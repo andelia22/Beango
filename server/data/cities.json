@@ -1,0 +1,36 @@
+{
+  "cities": [
+    {
+      "id": "caracas",
+      "name": "Caracas",
+      "description": "Venezuela's vibrant capital city with colonial architecture, mountain views, and rich culture",
+      "challengeCount": 24,
+      "challenges": [
+        { "id": 1, "caption": "Visit the historic Plaza Bolivar and take a photo with the statue", "imageUrl": "/generated_images/plaza_bolivar_colonial_buildings.png" },
+        { "id": 2, "caption": "Try an authentic Venezuelan arepa at a local restaurant", "imageUrl": "/generated_images/venezuelan_arepa_food_photo.png" },
+        { "id": 3, "caption": "Find and photograph a colorful street art mural", "imageUrl": "/generated_images/caracas_street_art_mural.png" },
+        { "id": 4, "caption": "Take the cable car up to Avila mountain and enjoy the view", "imageUrl": "/generated_images/avila_mountain_cable_car.png" },
+        { "id": 5, "caption": "Have breakfast with a traditional cachapa", "imageUrl": "/generated_images/venezuelan_cachapa_breakfast.png" },
+        { "id": 6, "caption": "Visit the historic Caracas Cathedral", "imageUrl": "/generated_images/caracas_cathedral_exterior.png" },
+        { "id": 7, "caption": "Explore a local market and try fresh tropical fruit", "imageUrl": "/generated_images/venezuelan_market_produce_stall.png" },
+        { "id": 8, "caption": "Take a photo at the iconic Parque Central towers", "imageUrl": "/generated_images/parque_central_towers.png" },
+        { "id": 9, "caption": "Enjoy a traditional pabellón criollo meal", "imageUrl": "/generated_images/pabellon_criollo_traditional_dish.png" },
+        { "id": 10, "caption": "Ride the Caracas metro system", "imageUrl": "/generated_images/caracas_metro_station.png" },
+        { "id": 11, "caption": "Share tequeños with friends at a café", "imageUrl": "/generated_images/tequeños_cheese_sticks.png" },
+        { "id": 12, "caption": "Visit the Teresa Carreño Cultural Center", "imageUrl": "/generated_images/teresa_carreno_theater.png" },
+        { "id": 13, "caption": "Take a peaceful walk through the Botanical Garden", "imageUrl": "/generated_images/botanical_garden_greenery.png" },
+        { "id": 14, "caption": "Try the famous Venezuelan quesillo dessert", "imageUrl": "/generated_images/quesillo_flan_dessert.png" },
+        { "id": 15, "caption": "Photograph a beautiful colonial house facade", "imageUrl": "/generated_images/colonial_house_facade.png" },
+        { "id": 16, "caption": "Visit the Museum of Fine Arts", "imageUrl": "/generated_images/fine_arts_museum_building.png" },
+        { "id": 17, "caption": "Grab a fresh empanada from a street vendor", "imageUrl": "/generated_images/venezuelan_empanada_close-up.png" },
+        { "id": 18, "caption": "Relax by the lake at Parque del Este", "imageUrl": "/generated_images/parque_del_este_lake.png" },
+        { "id": 19, "caption": "Find someone playing the traditional cuatro instrument", "imageUrl": "/generated_images/cuatro_venezuelan_instrument.png" },
+        { "id": 20, "caption": "Pay respects at the Panteón Nacional", "imageUrl": "/generated_images/panteon_nacional_monument.png" },
+        { "id": 21, "caption": "Buy a handmade souvenir from a local artisan", "imageUrl": "/generated_images/handicraft_market_stall.png" },
+        { "id": 22, "caption": "Capture the Caracas skyline at night", "imageUrl": "/generated_images/caracas_night_skyline.png" },
+        { "id": 23, "caption": "Try the traditional chicha beverage", "imageUrl": "/generated_images/chicha_traditional_drink.png" },
+        { "id": 24, "caption": "Watch a street performer and leave a tip", "imageUrl": "/generated_images/street_performer_scene.png" }
+      ]
+    }
+  ]
+}
