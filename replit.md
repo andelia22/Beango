@@ -43,21 +43,33 @@ Preferred communication style: Simple, everyday language.
 
 **Current Storage**: In-memory storage implementation (MemStorage class)
 - User CRUD operations
+- City catalog loaded from JSON file with Zod validation
 - Room validation via client-side roomStore
 - Designed for easy migration to database-backed storage
 
 **API Design**:
 - RESTful endpoints prefixed with `/api`
 - JSON request/response format
+- City endpoints: GET /api/cities, GET /api/cities/:cityId/challenges
 - Session-based request logging middleware
 - Raw body capture for webhook support
+
+**City Catalog System**:
+- Cities and challenges stored in `server/data/cities.json`
+- Validated on server startup using Zod schemas
+- challengeCount auto-calculated from challenges array length
+- Returns 404 for unknown cityId (frontend shows error UI)
+- Easily expandable: add city data + images, restart server (no code changes needed)
 
 ### Data Layer
 
 **ORM**: Drizzle ORM configured for PostgreSQL
 - Schema definitions in `shared/schema.ts` using Drizzle's type-safe API
 - Zod integration for runtime validation via `drizzle-zod`
-- Current schema defines basic user model (id, username, password)
+- Current schema defines:
+  - User model (id, username, password)
+  - City schema (id, name, description, country, challengeCount)
+  - Challenge schema (id, caption, imageUrl)
 
 **Database Strategy**:
 - Configured for Neon serverless PostgreSQL
@@ -75,11 +87,13 @@ Preferred communication style: Simple, everyday language.
 - Query client configured with infinite stale time (no automatic refetching)
 
 **Data Flow**:
-1. Room creation generates 6-character alphanumeric codes (ABC-123 format)
-2. Codes added to client-side validation set
-3. Join flow validates against stored codes
-4. Hunt page maintains local task completion state
-5. Submit triggers navigation to stats page
+1. Server loads and validates city catalog from JSON on startup
+2. Room creation: user selects city from API-fetched list
+3. Room code generated (6-character alphanumeric, ABC-123 format)
+4. Room stored in sessionStorage with cityId reference
+5. Hunt page fetches challenges from API using room's cityId
+6. Local state tracks task completion per user
+7. Submit (all tasks complete) triggers navigation to stats page
 
 ### Route Structure
 
@@ -97,10 +111,17 @@ Preferred communication style: Simple, everyday language.
 
 ### Asset Management
 
-**Images**: Pre-generated task images stored in `attached_assets/generated_images/`
-- 24 location-specific images for Caracas scavenger hunt
-- PNG format imported as modules via Vite
+**Images**: Pre-generated challenge images stored in `attached_assets/generated_images/`
+- Organized by city folder (e.g., `attached_assets/generated_images/caracas/`)
+- Current cities: Caracas (24 PNG images), Test City (3 JPG images, reused)
+- Image paths in catalog use format: `/attached_assets/generated_images/[city]/[filename]`
 - Asset path aliasing (`@assets`) configured in vite.config.ts
+
+**Adding New Cities**:
+- See `CITIES.md` for comprehensive guide
+- Place 24 images in new city folder
+- Add city data to `server/data/cities.json`
+- Restart server (validation ensures data integrity)
 
 **Font Loading**: Google Fonts CDN links in HTML head
 - Inter (primary UI font)
