@@ -1,6 +1,6 @@
 import { useLocation } from "wouter";
 import RoomJoin from "@/components/RoomJoin";
-import { roomExists } from "@/lib/roomStore";
+import { joinRoom } from "@/lib/roomStore";
 
 export default function Join() {
   const [, setLocation] = useLocation();
@@ -10,9 +10,9 @@ export default function Join() {
     
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    const exists = roomExists(roomCode);
+    const success = joinRoom(roomCode);
     
-    if (exists) {
+    if (success) {
       setLocation(`/hunt/${roomCode}`);
       return true;
     }

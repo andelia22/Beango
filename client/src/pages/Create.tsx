@@ -19,7 +19,7 @@ export default function Create() {
   const handleCreateRoom = (city: string) => {
     setCityName(city);
     const code = generateRoomCode();
-    addRoom(code);
+    addRoom(code, city);
     setRoomCode(code);
     console.log("Room created:", { city, code });
   };

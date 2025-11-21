@@ -1,22 +1,20 @@
 import { useRoute, useLocation } from "wouter";
 import StatsPage from "@/components/StatsPage";
+import { getRoom } from "@/lib/roomStore";
 
 export default function Stats() {
   const [, params] = useRoute("/stats/:code");
   const [, setLocation] = useLocation();
   const roomCode = params?.code || "DEMO-123";
 
-  const participants = [
-    { id: "1", name: "You", tasksCompleted: 24 },
-    { id: "2", name: "Maria", tasksCompleted: 22 },
-    { id: "3", name: "James", tasksCompleted: 18 },
-    { id: "4", name: "Sofia", tasksCompleted: 15 },
-  ];
+  const room = getRoom(roomCode);
+  const participants = room?.participants || [];
+  const cityName = room?.city || "Caracas";
 
   return (
     <StatsPage
       roomCode={roomCode}
-      cityName="Caracas"
+      cityName={cityName}
       participants={participants}
       totalTasks={24}
       onBackToHome={() => setLocation("/")}
