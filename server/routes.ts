@@ -3,11 +3,26 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // put application routes here
-  // prefix all routes with /api
+  app.get("/api/cities", async (_req, res) => {
+    try {
+      const cities = await storage.getCities();
+      res.json(cities);
+    } catch (error) {
+      console.error("Error fetching cities:", error);
+      res.status(500).json({ error: "Failed to fetch cities" });
+    }
+  });
 
-  // use storage to perform CRUD operations on the storage interface
-  // e.g. storage.insertUser(user) or storage.getUserByUsername(username)
+  app.get("/api/cities/:cityId/challenges", async (req, res) => {
+    try {
+      const { cityId } = req.params;
+      const challenges = await storage.getCityChallenges(cityId);
+      res.json(challenges);
+    } catch (error) {
+      console.error("Error fetching challenges:", error);
+      res.status(500).json({ error: "Failed to fetch challenges" });
+    }
+  });
 
   const httpServer = createServer(app);
 
