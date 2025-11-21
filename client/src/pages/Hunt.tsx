@@ -19,7 +19,7 @@ export default function Hunt() {
 
   const saveCompletionMutation = useMutation({
     mutationFn: async (data: { cityId: string; cityName: string; cityImageUrl: string | null; roomCode: string; participantCount: number }) => {
-      return await apiRequest("/api/beango-completions", "POST", data);
+      return await apiRequest("POST", "/api/beango-completions", data);
     },
   });
 

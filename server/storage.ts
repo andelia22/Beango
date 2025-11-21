@@ -107,4 +107,89 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+import { db } from "./db";
+import { users as usersTable, beangoCompletions as beangoCompletionsTable } from "@shared/schema";
+import { eq, desc } from "drizzle-orm";
+
+export class DatabaseStorage implements IStorage {
+  private cityCatalog: CityCatalog;
+
+  constructor() {
+    this.cityCatalog = loadCityCatalog();
+  }
+
+  async getUser(id: string): Promise<User | undefined> {
+    const result = await db.select().from(usersTable).where(eq(usersTable.id, id));
+    return result[0];
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const userId = userData.id || randomUUID();
+    const existing = await this.getUser(userId);
+    if (existing) {
+      const updated = await db
+        .update(usersTable)
+        .set({
+          email: userData.email ?? existing.email,
+          firstName: userData.firstName ?? existing.firstName,
+          lastName: userData.lastName ?? existing.lastName,
+          profileImageUrl: userData.profileImageUrl ?? existing.profileImageUrl,
+          updatedAt: new Date(),
+        })
+        .where(eq(usersTable.id, userId))
+        .returning();
+      return updated[0];
+    } else {
+      const inserted = await db
+        .insert(usersTable)
+        .values({
+          id: userId,
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          profileImageUrl: userData.profileImageUrl,
+        })
+        .returning();
+      return inserted[0];
+    }
+  }
+
+  async getCities(): Promise<City[]> {
+    return this.cityCatalog.cities.map(({ challenges, ...city }) => city);
+  }
+
+  async getCity(cityId: string): Promise<City | undefined> {
+    const cityData = this.cityCatalog.cities.find((c) => c.id === cityId);
+    if (!cityData) return undefined;
+    const { challenges, ...city } = cityData;
+    return city;
+  }
+
+  async getCityChallenges(cityId: string): Promise<Challenge[]> {
+    const cityData = this.cityCatalog.cities.find((c) => c.id === cityId);
+    return cityData?.challenges || [];
+  }
+
+  async createBeangoCompletion(completionData: InsertBeangoCompletion): Promise<BeangoCompletion> {
+    const inserted = await db
+      .insert(beangoCompletionsTable)
+      .values({
+        ...completionData,
+        cityImageUrl: completionData.cityImageUrl ?? null,
+        participantCount: completionData.participantCount ?? 1,
+      })
+      .returning();
+    return inserted[0];
+  }
+
+  async getUserCompletions(userId: string): Promise<BeangoCompletion[]> {
+    const completions = await db
+      .select()
+      .from(beangoCompletionsTable)
+      .where(eq(beangoCompletionsTable.userId, userId))
+      .orderBy(desc(beangoCompletionsTable.completedAt));
+    return completions;
+  }
+}
+
+export const storage = new DatabaseStorage();
