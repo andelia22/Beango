@@ -25,10 +25,18 @@ export const citySchema = z.object({
   challengeCount: z.number(),
 });
 
+export const locationSchema = z.object({
+  name: z.string(),
+  address: z.string().optional(),
+  latitude: z.number(),
+  longitude: z.number(),
+}).optional();
+
 export const challengeSchema = z.object({
   id: z.number(),
   caption: z.string(),
   imageUrl: z.string(),
+  location: locationSchema,
 });
 
 export type City = z.infer<typeof citySchema>;

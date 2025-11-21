@@ -8,6 +8,12 @@ interface Task {
   id: number;
   imageUrl: string;
   caption: string;
+  location?: {
+    name: string;
+    address?: string;
+    latitude: number;
+    longitude: number;
+  };
 }
 
 interface TaskFeedProps {
@@ -74,6 +80,7 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
             imageUrl={task.imageUrl}
             caption={task.caption}
             status={taskStatuses[task.id]}
+            location={task.location}
             onToggle={() => handleTaskToggle(task.id)}
           />
         ))}

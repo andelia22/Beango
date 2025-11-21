@@ -1,4 +1,4 @@
-import { Heart, User } from "lucide-react";
+import { Heart, MapPin } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -11,6 +11,12 @@ interface TaskCardProps {
   caption: string;
   status: TaskStatus;
   completedBy?: string;
+  location?: {
+    name: string;
+    address?: string;
+    latitude: number;
+    longitude: number;
+  };
   onToggle: () => void;
 }
 
@@ -20,6 +26,7 @@ export default function TaskCard({
   caption,
   status,
   completedBy,
+  location,
   onToggle,
 }: TaskCardProps) {
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
@@ -54,6 +61,21 @@ export default function TaskCard({
     e.stopPropagation();
     triggerToggle();
   };
+
+  const handleNavigate = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!location?.latitude || !location?.longitude) return;
+    
+    const url = `https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const hasValidLocation =
+    location &&
+    typeof location.latitude === 'number' &&
+    typeof location.longitude === 'number' &&
+    Number.isFinite(location.latitude) &&
+    Number.isFinite(location.longitude);
 
   const getStatusContent = () => {
     switch (status) {
@@ -145,6 +167,18 @@ export default function TaskCard({
           
           {status === "completed-by-me" && (
             <div className="absolute inset-0 border-4 border-primary pointer-events-none animate-in fade-in-0 duration-300" />
+          )}
+          
+          {hasValidLocation && (
+            <button
+              onClick={handleNavigate}
+              className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 bg-white/90 dark:bg-black/90 backdrop-blur-sm rounded-full text-xs font-medium hover-elevate active-elevate-2 transition-all duration-200 shadow-lg"
+              data-testid={`button-navigate-${taskNumber}`}
+              aria-label={location.name ? `Navigate to ${location.name}` : "Navigate to this location"}
+            >
+              <MapPin className="h-3.5 w-3.5 text-primary" />
+              <span className="text-foreground">Navigate</span>
+            </button>
           )}
         </div>
         
