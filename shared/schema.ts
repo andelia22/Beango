@@ -16,3 +16,19 @@ export const insertUserSchema = createInsertSchema(users).pick({
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
+export const citySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  challengeCount: z.number(),
+});
+
+export const challengeSchema = z.object({
+  id: z.number(),
+  caption: z.string(),
+  imageUrl: z.string(),
+});
+
+export type City = z.infer<typeof citySchema>;
+export type Challenge = z.infer<typeof challengeSchema>;
