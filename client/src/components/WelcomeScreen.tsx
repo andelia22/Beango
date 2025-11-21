@@ -30,7 +30,7 @@ export default function WelcomeScreen({ onCreateRoom, onJoinRoom }: WelcomeScree
               className="w-full h-12 text-base font-semibold"
               data-testid="button-welcome-create"
             >
-              Create New Hunt
+              Create new BeanGo Room
             </Button>
             
             <Button
@@ -39,7 +39,7 @@ export default function WelcomeScreen({ onCreateRoom, onJoinRoom }: WelcomeScree
               className="w-full h-12 text-base font-semibold"
               data-testid="button-welcome-join"
             >
-              Join Existing Hunt
+              Join Existing BeanGo Room
             </Button>
           </div>
 
