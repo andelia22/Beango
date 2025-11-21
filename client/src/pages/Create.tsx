@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import RoomCreation from "@/components/RoomCreation";
 import RoomCodeDisplay from "@/components/RoomCodeDisplay";
+import { addRoom } from "@/lib/roomStore";
 
 export default function Create() {
   const [, setLocation] = useLocation();
@@ -18,6 +19,7 @@ export default function Create() {
   const handleCreateRoom = (city: string) => {
     setCityName(city);
     const code = generateRoomCode();
+    addRoom(code);
     setRoomCode(code);
     console.log("Room created:", { city, code });
   };

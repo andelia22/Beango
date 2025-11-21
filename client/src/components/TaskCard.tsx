@@ -11,7 +11,7 @@ interface TaskCardProps {
   caption: string;
   status: TaskStatus;
   completedBy?: string;
-  onComplete: () => void;
+  onToggle: () => void;
 }
 
 export default function TaskCard({
@@ -20,24 +20,39 @@ export default function TaskCard({
   caption,
   status,
   completedBy,
-  onComplete,
+  onToggle,
 }: TaskCardProps) {
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   const [lastTap, setLastTap] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const handleDoubleTap = () => {
     const now = Date.now();
     const timeSinceLastTap = now - lastTap;
     
     if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
-      if (status === "incomplete") {
-        setShowHeartAnimation(true);
-        setTimeout(() => setShowHeartAnimation(false), 600);
-        onComplete();
-      }
+      triggerToggle();
     }
     
     setLastTap(now);
+  };
+
+  const triggerToggle = () => {
+    if (isAnimating) return;
+    
+    setIsAnimating(true);
+    setShowHeartAnimation(true);
+    setTimeout(() => {
+      setShowHeartAnimation(false);
+      setIsAnimating(false);
+    }, 600);
+    
+    onToggle();
+  };
+
+  const handleHeartClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    triggerToggle();
   };
 
   const getStatusContent = () => {
@@ -45,15 +60,29 @@ export default function TaskCard({
       case "incomplete":
         return (
           <div className="flex items-center gap-2 text-muted-foreground">
-            <Heart className="h-4 w-4" />
-            <span className="text-sm">Double tap to complete</span>
+            <button
+              onClick={handleHeartClick}
+              className="hover-elevate active-elevate-2 p-1 rounded-full transition-all duration-200"
+              data-testid={`button-heart-${taskNumber}`}
+              aria-label="Mark as complete"
+            >
+              <Heart className="h-5 w-5 transition-all duration-200" />
+            </button>
+            <span className="text-sm">Tap heart or double tap to complete</span>
           </div>
         );
       case "completed-by-me":
         return (
           <div className="flex items-center gap-2">
-            <Heart className="h-4 w-4 fill-primary text-primary" />
-            <Badge variant="default" className="bg-primary text-primary-foreground">
+            <button
+              onClick={handleHeartClick}
+              className="hover-elevate active-elevate-2 p-1 rounded-full transition-all duration-200"
+              data-testid={`button-heart-${taskNumber}`}
+              aria-label="Mark as incomplete"
+            >
+              <Heart className="h-5 w-5 fill-primary text-primary transition-all duration-200 animate-in zoom-in-50" />
+            </button>
+            <Badge variant="default" className="bg-primary text-primary-foreground animate-in slide-in-from-left-2">
               Completed by you
             </Badge>
           </div>
@@ -61,7 +90,9 @@ export default function TaskCard({
       case "completed-by-friend":
         return (
           <div className="flex items-center gap-2">
-            <Heart className="h-4 w-4 fill-chart-2 text-chart-2" />
+            <div className="p-1">
+              <Heart className="h-5 w-5 fill-chart-2 text-chart-2" />
+            </div>
             <Avatar className="h-6 w-6">
               <AvatarFallback className="text-xs bg-chart-2 text-white">
                 {completedBy?.charAt(0) || "F"}
@@ -77,7 +108,11 @@ export default function TaskCard({
 
   return (
     <div className="mb-6" data-testid={`card-task-${taskNumber}`}>
-      <div className="bg-card rounded-lg overflow-hidden border border-card-border">
+      <div className={`bg-card rounded-lg overflow-hidden border transition-all duration-300 ${
+        status === "completed-by-me" 
+          ? "border-primary shadow-lg shadow-primary/20" 
+          : "border-card-border"
+      }`}>
         <div className="p-3 flex items-center justify-between">
           <Badge variant="secondary" className="text-xs">
             Task {taskNumber}
@@ -92,13 +127,15 @@ export default function TaskCard({
           <img
             src={imageUrl}
             alt={caption}
-            className="w-full h-full object-cover"
+            className={`w-full h-full object-cover transition-all duration-300 ${
+              status === "completed-by-me" ? "brightness-110" : ""
+            }`}
           />
           
           {showHeartAnimation && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <Heart
-                className="h-24 w-24 fill-primary text-primary animate-in zoom-in-0 fade-in-0 duration-300"
+                className="h-24 w-24 fill-primary text-primary"
                 style={{
                   animation: "heartBounce 600ms ease-out",
                 }}
@@ -107,7 +144,7 @@ export default function TaskCard({
           )}
           
           {status === "completed-by-me" && (
-            <div className="absolute inset-0 border-4 border-primary pointer-events-none" />
+            <div className="absolute inset-0 border-4 border-primary pointer-events-none animate-in fade-in-0 duration-300" />
           )}
         </div>
         

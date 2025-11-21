@@ -13,9 +13,9 @@ export default function TaskCardExample() {
         caption="Visit the historic Plaza Bolivar and take a photo with the statue"
         status={status}
         completedBy="Maria"
-        onComplete={() => {
-          console.log("Task completed!");
-          setStatus("completed-by-me");
+        onToggle={() => {
+          console.log("Task toggled!");
+          setStatus(status === "completed-by-me" ? "incomplete" : "completed-by-me");
         }}
       />
     </div>

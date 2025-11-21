@@ -22,10 +22,10 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleTaskComplete = (taskId: number) => {
+  const handleTaskToggle = (taskId: number) => {
     setTaskStatuses((prev) => ({
       ...prev,
-      [taskId]: "completed-by-me",
+      [taskId]: prev[taskId] === "completed-by-me" ? "incomplete" : "completed-by-me",
     }));
   };
 
@@ -54,7 +54,7 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
             imageUrl={task.imageUrl}
             caption={task.caption}
             status={taskStatuses[task.id]}
-            onComplete={() => handleTaskComplete(task.id)}
+            onToggle={() => handleTaskToggle(task.id)}
           />
         ))}
         

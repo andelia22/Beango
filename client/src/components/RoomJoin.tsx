@@ -2,15 +2,17 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Users } from "lucide-react";
+import { Users, AlertCircle } from "lucide-react";
 
 interface RoomJoinProps {
-  onJoinRoom: (roomCode: string) => void;
+  onJoinRoom: (roomCode: string) => Promise<boolean>;
   onCreateInstead: () => void;
 }
 
 export default function RoomJoin({ onJoinRoom, onCreateInstead }: RoomJoinProps) {
   const [roomCode, setRoomCode] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isValidating, setIsValidating] = useState(false);
 
   const formatRoomCode = (value: string) => {
     const clean = value.replace(/[^A-Z0-9]/gi, "").toUpperCase();
@@ -21,11 +23,21 @@ export default function RoomJoin({ onJoinRoom, onCreateInstead }: RoomJoinProps)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatRoomCode(e.target.value);
     setRoomCode(formatted);
+    setError(null);
   };
 
-  const handleJoin = () => {
+  const handleJoin = async () => {
     if (roomCode.length === 7) {
-      onJoinRoom(roomCode);
+      setIsValidating(true);
+      setError(null);
+      
+      const isValid = await onJoinRoom(roomCode);
+      
+      setIsValidating(false);
+      
+      if (!isValid) {
+        setError("Room not found. Please check the code and try again.");
+      }
     }
   };
 
@@ -52,19 +64,30 @@ export default function RoomJoin({ onJoinRoom, onCreateInstead }: RoomJoinProps)
               onChange={handleInputChange}
               placeholder="ABC-123"
               maxLength={7}
-              className="text-center text-lg font-mono tracking-wider h-12"
+              className={`text-center text-lg font-mono tracking-wider h-12 transition-all ${
+                error ? "border-destructive focus-visible:ring-destructive" : ""
+              }`}
               data-testid="input-room-code"
             />
+            {error && (
+              <div
+                className="flex items-center gap-2 text-sm text-destructive animate-in slide-in-from-top-1"
+                data-testid="text-error-room-not-found"
+              >
+                <AlertCircle className="h-4 w-4" />
+                <span>{error}</span>
+              </div>
+            )}
           </div>
 
           <div className="space-y-3">
             <Button
               onClick={handleJoin}
-              disabled={roomCode.length !== 7}
+              disabled={roomCode.length !== 7 || isValidating}
               className="w-full h-12 text-base font-semibold"
               data-testid="button-join-room"
             >
-              Join Room
+              {isValidating ? "Validating..." : "Join Room"}
             </Button>
             
             <Button
