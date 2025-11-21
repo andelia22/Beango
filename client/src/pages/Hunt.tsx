@@ -1,6 +1,7 @@
 import { useRoute, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import TaskFeed from "@/components/TaskFeed";
 import { getRoom } from "@/lib/roomStore";
@@ -9,6 +10,7 @@ import type { Challenge, City } from "@shared/schema";
 export default function Hunt() {
   const [, params] = useRoute("/hunt/:code");
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   const roomCode = params?.code || "DEMO-123";
 
@@ -85,7 +87,18 @@ export default function Hunt() {
         });
       } catch (error) {
         console.error("Failed to save completion:", error);
+        toast({
+          title: "Failed to save completion",
+          description: "Your progress couldn't be saved. Please try again.",
+          variant: "destructive",
+        });
       }
+    } else {
+      toast({
+        title: "Not logged in",
+        description: "You must be logged in to save your progress.",
+        variant: "destructive",
+      });
     }
     setLocation(`/stats/${roomCode}`);
   };

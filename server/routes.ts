@@ -7,7 +7,10 @@ import { insertBeangoCompletionSchema } from "@shared/schema";
 export async function registerRoutes(app: Express): Promise<Server> {
   await setupAuth(app);
 
-  app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
+  app.get("/api/auth/user", async (req: any, res) => {
+    if (!req.isAuthenticated() || !req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);

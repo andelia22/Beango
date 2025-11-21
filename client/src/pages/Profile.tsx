@@ -1,7 +1,5 @@
-import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -10,27 +8,12 @@ import { Trophy, MapPin } from "lucide-react";
 import type { BeangoCompletion } from "@shared/schema";
 
 export default function Profile() {
-  const { toast } = useToast();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
 
   const { data: completions = [], isLoading: completionsLoading } = useQuery<BeangoCompletion[]>({
     queryKey: ["/api/beango-completions"],
     enabled: isAuthenticated,
   });
-
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, authLoading, toast]);
 
   if (authLoading || completionsLoading) {
     return (
