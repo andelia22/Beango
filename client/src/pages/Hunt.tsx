@@ -1,5 +1,7 @@
 import { useRoute, useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { apiRequest } from "@/lib/queryClient";
 import TaskFeed from "@/components/TaskFeed";
 import { getRoom } from "@/lib/roomStore";
 import type { Challenge, City } from "@shared/schema";
@@ -7,10 +9,17 @@ import type { Challenge, City } from "@shared/schema";
 export default function Hunt() {
   const [, params] = useRoute("/hunt/:code");
   const [, setLocation] = useLocation();
+  const { isAuthenticated } = useAuth();
   const roomCode = params?.code || "DEMO-123";
 
   const room = getRoom(roomCode);
   const cityId = room?.cityId || "caracas";
+
+  const saveCompletionMutation = useMutation({
+    mutationFn: async (data: { cityId: string; cityName: string; cityImageUrl: string | null; roomCode: string; participantCount: number }) => {
+      return await apiRequest("/api/beango-completions", "POST", data);
+    },
+  });
 
   const { data: city } = useQuery<City>({
     queryKey: ["/api/cities", cityId],
@@ -64,12 +73,29 @@ export default function Hunt() {
     );
   }
 
+  const handleSubmit = async () => {
+    if (isAuthenticated) {
+      try {
+        await saveCompletionMutation.mutateAsync({
+          cityId: city.id,
+          cityName: city.name,
+          cityImageUrl: challenges[0]?.imageUrl || null,
+          roomCode,
+          participantCount: 1,
+        });
+      } catch (error) {
+        console.error("Failed to save completion:", error);
+      }
+    }
+    setLocation(`/stats/${roomCode}`);
+  };
+
   return (
     <TaskFeed
       cityName={city.name}
       roomCode={roomCode}
       tasks={challenges}
-      onSubmit={() => setLocation(`/stats/${roomCode}`)}
+      onSubmit={handleSubmit}
     />
   );
 }

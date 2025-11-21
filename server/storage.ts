@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type City, type Challenge, citySchema, challengeSchema } from "@shared/schema";
+import { type User, type UpsertUser, type City, type Challenge, type BeangoCompletion, type InsertBeangoCompletion, citySchema, challengeSchema } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { readFileSync } from "fs";
 import { join } from "path";
@@ -33,19 +33,22 @@ function loadCityCatalog(): CityCatalog {
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  upsertUser(user: UpsertUser): Promise<User>;
   getCities(): Promise<City[]>;
   getCity(cityId: string): Promise<City | undefined>;
   getCityChallenges(cityId: string): Promise<Challenge[]>;
+  createBeangoCompletion(completion: InsertBeangoCompletion): Promise<BeangoCompletion>;
+  getUserCompletions(userId: string): Promise<BeangoCompletion[]>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
+  private completions: Map<string, BeangoCompletion>;
   private cityCatalog: CityCatalog;
 
   constructor() {
     this.users = new Map();
+    this.completions = new Map();
     this.cityCatalog = loadCityCatalog();
   }
 
@@ -53,16 +56,18 @@ export class MemStorage implements IStorage {
     return this.users.get(id);
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const existing = this.users.get(userData.id!);
+    const user: User = {
+      id: userData.id || randomUUID(),
+      email: userData.email || null,
+      firstName: userData.firstName || null,
+      lastName: userData.lastName || null,
+      profileImageUrl: userData.profileImageUrl || null,
+      createdAt: existing?.createdAt || new Date(),
+      updatedAt: new Date(),
+    };
+    this.users.set(user.id, user);
     return user;
   }
 
@@ -80,6 +85,25 @@ export class MemStorage implements IStorage {
   async getCityChallenges(cityId: string): Promise<Challenge[]> {
     const cityData = this.cityCatalog.cities.find((c) => c.id === cityId);
     return cityData?.challenges || [];
+  }
+
+  async createBeangoCompletion(completionData: InsertBeangoCompletion): Promise<BeangoCompletion> {
+    const id = randomUUID();
+    const completion: BeangoCompletion = {
+      id,
+      ...completionData,
+      cityImageUrl: completionData.cityImageUrl ?? null,
+      participantCount: completionData.participantCount ?? 1,
+      completedAt: new Date(),
+    };
+    this.completions.set(id, completion);
+    return completion;
+  }
+
+  async getUserCompletions(userId: string): Promise<BeangoCompletion[]> {
+    return Array.from(this.completions.values())
+      .filter((c) => c.userId === userId)
+      .sort((a, b) => (b.completedAt?.getTime() || 0) - (a.completedAt?.getTime() || 0));
   }
 }
 

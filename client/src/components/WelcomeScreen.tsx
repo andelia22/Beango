@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Users, Camera } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { MapPin, Users, Camera, UserCircle, History } from "lucide-react";
+import { Link } from "wouter";
 
 interface WelcomeScreenProps {
   onCreateRoom: () => void;
@@ -81,6 +82,20 @@ export default function WelcomeScreen({ onCreateRoom, onJoinRoom }: WelcomeScree
             </div>
           </div>
         </CardContent>
+        <CardFooter className="flex gap-2 border-t pt-4">
+          <Link href="/profile" className="flex-1">
+            <Button variant="ghost" className="w-full" data-testid="button-nav-profile">
+              <UserCircle className="w-4 h-4 mr-2" />
+              Profile
+            </Button>
+          </Link>
+          <Link href="/history" className="flex-1">
+            <Button variant="ghost" className="w-full" data-testid="button-nav-history">
+              <History className="w-4 h-4 mr-2" />
+              History
+            </Button>
+          </Link>
+        </CardFooter>
       </Card>
     </div>
   );

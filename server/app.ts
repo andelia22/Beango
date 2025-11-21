@@ -65,9 +65,7 @@ app.use((req, res, next) => {
   next();
 });
 
-const assetsPath = process.env.NODE_ENV === "production"
-  ? path.resolve(process.cwd(), "attached_assets")
-  : path.resolve(import.meta.dirname, "..", "attached_assets");
+const assetsPath = path.resolve(process.cwd(), "attached_assets");
 app.use("/attached_assets", express.static(assetsPath));
 
 export default async function runApp(
