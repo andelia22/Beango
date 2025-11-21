@@ -16,6 +16,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/cities/:cityId/challenges", async (req, res) => {
     try {
       const { cityId } = req.params;
+      const city = await storage.getCity(cityId);
+      
+      if (!city) {
+        return res.status(404).json({ error: `City '${cityId}' not found` });
+      }
+      
       const challenges = await storage.getCityChallenges(cityId);
       res.json(challenges);
     } catch (error) {

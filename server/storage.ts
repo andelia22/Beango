@@ -1,16 +1,34 @@
-import { type User, type InsertUser, type City, type Challenge } from "@shared/schema";
+import { type User, type InsertUser, type City, type Challenge, citySchema, challengeSchema } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { readFileSync } from "fs";
 import { join } from "path";
+import { z } from "zod";
 
 interface CityCatalog {
   cities: Array<City & { challenges: Challenge[] }>;
 }
 
+const cityCatalogSchema = z.object({
+  cities: z.array(
+    citySchema.extend({
+      challenges: z.array(challengeSchema),
+    })
+  ),
+});
+
 function loadCityCatalog(): CityCatalog {
   const catalogPath = join(import.meta.dirname, "data", "cities.json");
   const catalogData = readFileSync(catalogPath, "utf-8");
-  return JSON.parse(catalogData);
+  const rawData = JSON.parse(catalogData);
+  
+  const validatedData = cityCatalogSchema.parse(rawData);
+  
+  const normalizedCities = validatedData.cities.map((city) => ({
+    ...city,
+    challengeCount: city.challenges.length,
+  }));
+  
+  return { cities: normalizedCities };
 }
 
 export interface IStorage {

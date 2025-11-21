@@ -50,7 +50,7 @@ Edit `server/data/cities.json` to add your new city.
       "challenges": [
         {
           "id": 1,
-          "imagePath": "/attached_assets/generated_images/plaza_bolivar_colonial_buildings.png",
+          "imageUrl": "/attached_assets/generated_images/plaza_bolivar_colonial_buildings.png",
           "caption": "Visit the historic Plaza Bolivar and take a photo with the statue"
         }
       ]
@@ -63,17 +63,17 @@ Edit `server/data/cities.json` to add your new city.
       "challenges": [
         {
           "id": 1,
-          "imagePath": "/attached_assets/generated_images/paris/eiffel-tower-selfie.png",
+          "imageUrl": "/attached_assets/generated_images/paris/eiffel-tower-selfie.png",
           "caption": "Take a selfie at the Eiffel Tower"
         },
         {
           "id": 2,
-          "imagePath": "/attached_assets/generated_images/paris/louvre-museum-visit.png",
+          "imageUrl": "/attached_assets/generated_images/paris/louvre-museum-visit.png",
           "caption": "Visit the Louvre Museum and see the Mona Lisa"
         },
         {
           "id": 3,
-          "imagePath": "/attached_assets/generated_images/paris/croissant-breakfast.png",
+          "imageUrl": "/attached_assets/generated_images/paris/croissant-breakfast.png",
           "caption": "Have a traditional French breakfast with croissants"
         }
       ]
@@ -87,17 +87,25 @@ Edit `server/data/cities.json` to add your new city.
 **City Object:**
 - `id` (string, required): Unique identifier using kebab-case (e.g., "paris", "new-york")
 - `name` (string, required): Display name of the city (e.g., "Paris")
-- `country` (string, required): Country name (e.g., "France")
-- `challengeCount` (number, required): Total number of challenges (must be 24)
+- `description` (string, optional): Brief description of the city
+- `country` (string, optional): Country name (e.g., "France")
+- `challengeCount` (number, auto-calculated): Total number of challenges - automatically set to the length of the challenges array. You can include it in your JSON for clarity, but it will be overwritten with the actual count.
 
 **Challenge Object:**
 - `id` (number, required): Sequential number from 1-24
-- `imagePath` (string, required): Path to the challenge image starting with `/attached_assets/`
+- `imageUrl` (string, required): Path to the challenge image starting with `/attached_assets/`
 - `caption` (string, required): Description of the challenge activity
 
-## Step 3: Restart the Application
+## Step 3: Validate and Restart
+
+Before restarting, verify your JSON is valid:
+- Use a JSON validator to check syntax
+- Ensure each city has exactly 24 challenges
+- Verify all image paths are correct and files exist
 
 After updating `cities.json`, restart the BeanGo application. Your new city will automatically appear in the city selector when creating a room!
+
+**Important:** The catalog is validated on startup. If there are errors in your JSON (missing required fields, invalid data types, etc.), the server will fail to start and show an error message. This helps catch mistakes early!
 
 ## Tips for Creating Great Challenges
 
@@ -137,9 +145,10 @@ Include a mix of:
 - Check that image files exist at the specified paths
 - Ensure image filenames match exactly (case-sensitive)
 
-### Challenge count mismatch
+### Challenge count issues
 - Each city must have exactly 24 challenges
-- Ensure `challengeCount` matches the number of items in `challenges` array
+- The `challengeCount` is automatically calculated from the challenges array length
+- Server will fail to start if validation errors are found in cities.json
 
 ## Example: Complete City Entry
 
@@ -154,12 +163,12 @@ Here's a complete example for reference:
   "challenges": [
     {
       "id": 1,
-      "imagePath": "/attached_assets/generated_images/tokyo/shibuya-crossing.png",
+      "imageUrl": "/attached_assets/generated_images/tokyo/shibuya-crossing.png",
       "caption": "Cross the famous Shibuya intersection"
     },
     {
       "id": 2,
-      "imagePath": "/attached_assets/generated_images/tokyo/ramen-bowl.png",
+      "imageUrl": "/attached_assets/generated_images/tokyo/ramen-bowl.png",
       "caption": "Try authentic Tokyo-style ramen"
     },
     ... (22 more challenges)

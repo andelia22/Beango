@@ -22,10 +22,13 @@ export default function Hunt() {
     enabled: !!cityId,
   });
 
-  const { data: challenges = [], isLoading } = useQuery<Challenge[]>({
+  const { data: challenges = [], isLoading, error } = useQuery<Challenge[]>({
     queryKey: ["/api/cities", cityId, "challenges"],
     queryFn: async () => {
       const response = await fetch(`/api/cities/${cityId}/challenges`);
+      if (!response.ok) {
+        throw new Error(`Failed to load challenges for city '${cityId}'`);
+      }
       return response.json();
     },
     enabled: !!cityId,
@@ -37,6 +40,25 @@ export default function Hunt() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading challenges...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <h2 className="text-2xl font-bold text-destructive mb-2">City Not Found</h2>
+          <p className="text-muted-foreground mb-4">
+            The city for this room could not be found. The room may have been created with an invalid city.
+          </p>
+          <button
+            onClick={() => setLocation("/")}
+            className="text-primary hover:underline"
+          >
+            Return to Home
+          </button>
         </div>
       </div>
     );

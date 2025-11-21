@@ -20,7 +20,8 @@ export type User = typeof users.$inferSelect;
 export const citySchema = z.object({
   id: z.string(),
   name: z.string(),
-  description: z.string(),
+  description: z.string().optional(),
+  country: z.string().optional(),
   challengeCount: z.number(),
 });
 
