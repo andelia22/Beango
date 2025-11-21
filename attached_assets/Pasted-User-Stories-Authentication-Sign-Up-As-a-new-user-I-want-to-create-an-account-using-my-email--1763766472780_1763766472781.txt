@@ -1,0 +1,54 @@
+User Stories (Authentication)
+
+Sign Up
+As a new user, I want to create an account using my email and a password so that I can save my progress and BeanGo history.
+As a new user, I want to set a display name so my friends can recognize me in shared BeanGos.
+
+Sign In
+As a returning user, I want to sign in with my existing email and password so I can access my saved BeanGos, profile, and history.
+As a returning user, I want the app to remember me on this device so I don’t have to log in every time.
+
+Password Reset
+As a user who forgot my password, I want to reset it via email so I can regain access to my account.
+
+Log Out
+As a user, I want to log out from my account so I can switch accounts or secure my data on a shared device.
+
+User Stories (Profile)
+
+View Profile
+As a user, I want to view my profile so I can see my stats and what I’ve completed so far.
+
+Edit Profile
+As a user, I want to edit my display name so that my friends see the name I prefer.
+As a user, I want to upload or change a profile picture so my account feels more personal.
+
+View Account Info
+As a user, I want to see which email is linked to my account so I know where notifications and reset links go.
+
+Change Password
+As a security-conscious user, I want to change my password from the profile section so I can keep my account secure.
+
+See Progress Summary
+As a user, I want to see a quick summary of how many BeanGos I’ve completed so I can feel my progress and achievements.
+
+User Stories (History)
+
+View All Completed BeanGos
+As a user, I want to see a list of all the BeanGos I’ve completed so I can look back at my travels and experiences.
+As a user, I want to see the city name and an image for each BeanGo so I immediately recognize the trip.
+
+See Number of Participants
+As a user, I want to see how many people participated in each BeanGo so I can remember which trips were solo and which were with friends.
+
+View Most Recent First
+As a frequent traveler, I want my most recent BeanGos to appear at the top so I can easily find my latest trips.
+
+Drill into Details (If Implemented)
+As a user, I want to tap on a completed BeanGo to see more details (tasks completed, who joined, when it was done) so I can reminisce or share it with others.
+
+Empty State
+As a brand-new user, I want to see a friendly message in History that encourages me to complete my first BeanGo so I know what this section will eventually show.
+
+
+
