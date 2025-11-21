@@ -48,9 +48,9 @@ export default function RoomJoin({ onJoinRoom, onCreateInstead }: RoomJoinProps)
           <div className="mx-auto w-12 h-12 bg-chart-2/10 rounded-full flex items-center justify-center mb-2">
             <Users className="h-6 w-6 text-chart-2" />
           </div>
-          <CardTitle className="text-2xl">Join Scavenger Hunt</CardTitle>
+          <CardTitle className="text-2xl">Join BeanGo Room</CardTitle>
           <CardDescription>
-            Enter the room code to join your friends' adventure
+            Enter the room code to join your friends' BeanGo board
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">

@@ -1,9 +1,21 @@
-export const VALID_ROOM_CODES = new Set<string>();
+const STORAGE_KEY = 'beango_valid_rooms';
+
+function loadRooms(): Set<string> {
+  const stored = sessionStorage.getItem(STORAGE_KEY);
+  return stored ? new Set(JSON.parse(stored)) : new Set();
+}
+
+function saveRooms(rooms: Set<string>) {
+  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(rooms)));
+}
 
 export function addRoom(roomCode: string) {
-  VALID_ROOM_CODES.add(roomCode);
+  const rooms = loadRooms();
+  rooms.add(roomCode);
+  saveRooms(rooms);
 }
 
 export function roomExists(roomCode: string): boolean {
-  return VALID_ROOM_CODES.has(roomCode);
+  const rooms = loadRooms();
+  return rooms.has(roomCode);
 }

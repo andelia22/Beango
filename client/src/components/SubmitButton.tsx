@@ -20,7 +20,7 @@ export default function SubmitButton({
     <div className="pt-8 pb-12">
       {!allComplete && (
         <p className="text-center text-sm text-muted-foreground mb-4" data-testid="text-progress">
-          {completedTasks}/{totalTasks} tasks complete
+          {completedTasks}/{totalTasks} challenges complete
         </p>
       )}
       <Button
@@ -37,10 +37,10 @@ export default function SubmitButton({
         ) : allComplete ? (
           <>
             <CheckCircle2 className="mr-2 h-5 w-5" />
-            Submit Scavenger Hunt
+            Complete BeanGo Board
           </>
         ) : (
-          "Complete all tasks to submit"
+          "Complete all challenges to submit"
         )}
       </Button>
     </div>

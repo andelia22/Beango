@@ -16,10 +16,10 @@ export default function WelcomeScreen({ onCreateRoom, onJoinRoom }: WelcomeScree
             <MapPin className="h-8 w-8 text-primary" />
           </div>
           <CardTitle className="text-3xl font-bold tracking-tight">
-            City Scavenger Hunt
+            BeanGo: City Scavenger Hunt
           </CardTitle>
           <CardDescription className="text-base">
-            Explore cities with friends and complete exciting tasks together
+            Explore the world with your friends and complete the BeanGo board
           </CardDescription>
         </CardHeader>
         
@@ -61,9 +61,9 @@ export default function WelcomeScreen({ onCreateRoom, onJoinRoom }: WelcomeScree
                 <Camera className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <p className="font-medium text-sm">24 Unique Tasks</p>
+                <p className="font-medium text-sm">24 Unique Challenges</p>
                 <p className="text-xs text-muted-foreground">
-                  Complete challenges across the city
+                  Complete the BeanGo board across the city
                 </p>
               </div>
             </div>
@@ -75,7 +75,7 @@ export default function WelcomeScreen({ onCreateRoom, onJoinRoom }: WelcomeScree
               <div>
                 <p className="font-medium text-sm">Real-Time Updates</p>
                 <p className="text-xs text-muted-foreground">
-                  See when friends complete tasks instantly
+                  See when friends complete challenges instantly
                 </p>
               </div>
             </div>

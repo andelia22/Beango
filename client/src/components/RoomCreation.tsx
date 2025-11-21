@@ -30,9 +30,9 @@ export default function RoomCreation({ onCreateRoom, onBack }: RoomCreationProps
           <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2">
             <Sparkles className="h-6 w-6 text-primary" />
           </div>
-          <CardTitle className="text-2xl">Create Scavenger Hunt</CardTitle>
+          <CardTitle className="text-2xl">Create BeanGo Room</CardTitle>
           <CardDescription>
-            Start a new adventure with your friends
+            Start a new BeanGo adventure with your friends
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -46,7 +46,7 @@ export default function RoomCreation({ onCreateRoom, onBack }: RoomCreationProps
                 <SelectItem value="Caracas">Caracas</SelectItem>
               </SelectContent>
             </Select>
-            <p className="text-sm text-muted-foreground">24 exciting tasks to complete</p>
+            <p className="text-sm text-muted-foreground">24 exciting challenges on the board</p>
           </div>
 
           <Button

@@ -36,7 +36,7 @@ export default function RoomCodeDisplay({ roomCode, cityName, onContinue, onBack
           </div>
           <CardTitle className="text-2xl">Room Created!</CardTitle>
           <CardDescription>
-            Share this code with your friends to join the {cityName} scavenger hunt
+            Share this code with your friends to join the {cityName} BeanGo adventure
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">

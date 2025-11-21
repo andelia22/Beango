@@ -44,7 +44,7 @@ export default function StatsPage({
             <Trophy className="h-8 w-8 text-primary" />
           </div>
           <h1 className="text-3xl font-bold mb-2" data-testid="text-stats-title">
-            Hunt Complete!
+            BeanGo Complete!
           </h1>
           <p className="text-muted-foreground">
             {cityName} • Room {roomCode}
@@ -87,7 +87,7 @@ export default function StatsPage({
                       {participant.name}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {participant.tasksCompleted} / {totalTasks} tasks
+                      {participant.tasksCompleted} / {totalTasks} challenges
                     </p>
                   </div>
                 </div>
