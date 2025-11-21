@@ -1,13 +1,19 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import RoomCreation from "@/components/RoomCreation";
 import RoomCodeDisplay from "@/components/RoomCodeDisplay";
 import { addRoom } from "@/lib/roomStore";
+import type { City } from "@shared/schema";
 
 export default function Create() {
   const [, setLocation] = useLocation();
   const [roomCode, setRoomCode] = useState<string | null>(null);
-  const [cityName, setCityName] = useState<string>("");
+  const [cityId, setCityId] = useState<string>("");
+
+  const { data: cities } = useQuery<City[]>({
+    queryKey: ["/api/cities"],
+  });
 
   const generateRoomCode = () => {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -16,12 +22,12 @@ export default function Create() {
     return `${part1}-${part2}`;
   };
 
-  const handleCreateRoom = (city: string) => {
-    setCityName(city);
+  const handleCreateRoom = (selectedCityId: string) => {
+    setCityId(selectedCityId);
     const code = generateRoomCode();
-    addRoom(code, city);
+    addRoom(code, selectedCityId);
     setRoomCode(code);
-    console.log("Room created:", { city, code });
+    console.log("Room created:", { cityId: selectedCityId, code });
   };
 
   const handleContinue = () => {
@@ -31,6 +37,7 @@ export default function Create() {
   };
 
   if (roomCode) {
+    const cityName = cities?.find(c => c.id === cityId)?.name || "";
     return (
       <RoomCodeDisplay
         roomCode={roomCode}

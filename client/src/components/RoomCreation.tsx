@@ -1,16 +1,22 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sparkles, ArrowLeft } from "lucide-react";
+import { Sparkles, ArrowLeft, Loader2 } from "lucide-react";
+import type { City } from "@shared/schema";
 
 interface RoomCreationProps {
-  onCreateRoom: (cityName: string) => void;
+  onCreateRoom: (cityId: string) => void;
   onBack: () => void;
 }
 
 export default function RoomCreation({ onCreateRoom, onBack }: RoomCreationProps) {
-  const [selectedCity, setSelectedCity] = useState("Caracas");
+  const [selectedCityId, setSelectedCityId] = useState<string>("");
+
+  const { data: cities, isLoading } = useQuery<City[]>({
+    queryKey: ["/api/cities"],
+  });
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-primary/5 via-background to-chart-2/5">
@@ -38,19 +44,36 @@ export default function RoomCreation({ onCreateRoom, onBack }: RoomCreationProps
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <label htmlFor="city-select" className="text-sm font-medium">City</label>
-            <Select value={selectedCity} onValueChange={setSelectedCity}>
-              <SelectTrigger id="city-select" className="h-12" data-testid="select-city">
-                <SelectValue placeholder="Select a city" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Caracas">Caracas</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-sm text-muted-foreground">24 exciting challenges on the board</p>
+            {isLoading ? (
+              <div className="flex items-center justify-center h-12 border rounded-md">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <>
+                <Select value={selectedCityId} onValueChange={setSelectedCityId}>
+                  <SelectTrigger id="city-select" className="h-12" data-testid="select-city">
+                    <SelectValue placeholder="Select a city" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cities?.map((city) => (
+                      <SelectItem key={city.id} value={city.id}>
+                        {city.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {selectedCityId && cities && (
+                  <p className="text-sm text-muted-foreground">
+                    {cities.find(c => c.id === selectedCityId)?.challengeCount} exciting challenges on the board
+                  </p>
+                )}
+              </>
+            )}
           </div>
 
           <Button
-            onClick={() => onCreateRoom(selectedCity)}
+            onClick={() => onCreateRoom(selectedCityId)}
+            disabled={!selectedCityId || isLoading}
             className="w-full h-12 text-base font-semibold"
             data-testid="button-create-room"
           >

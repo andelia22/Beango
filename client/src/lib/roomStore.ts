@@ -9,7 +9,7 @@ export interface Participant {
 
 export interface Room {
   code: string;
-  city: string;
+  cityId: string;
   participants: Participant[];
 }
 
@@ -31,13 +31,13 @@ export function getCurrentUser(): string {
   return userId;
 }
 
-export function addRoom(roomCode: string, city: string) {
+export function addRoom(roomCode: string, cityId: string) {
   const rooms = loadRooms();
   const userId = getCurrentUser();
   
   rooms[roomCode] = {
     code: roomCode,
-    city,
+    cityId,
     participants: [
       {
         id: userId,
