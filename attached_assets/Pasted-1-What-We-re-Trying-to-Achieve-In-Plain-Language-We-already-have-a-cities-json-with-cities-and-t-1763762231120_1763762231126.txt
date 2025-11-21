@@ -1,0 +1,182 @@
+1. What We’re Trying to Achieve (In Plain Language)
+
+We already have a cities.json with cities and their tasks.
+
+We want to:
+
+Add optional location data (including coordinates) to each task.
+
+Show a small floating “Navigate” pill at the bottom-right of the task image only if that task has coordinates.
+
+When the user taps the pill, we open the maps app/site with directions to that place.
+
+So the flow is:
+
+The backend data model gets a location block per task →
+frontend checks if a task has coordinates →
+if yes, show pill →
+tap pill → open maps with that lat/lng.
+
+2. Updating server/data/cities.json
+2.1. Current JSON (Conceptual)
+
+Right now, you probably have something like:
+
+{
+  "cities": [
+    {
+      "id": "caracas",
+      "name": "Caracas",
+      "tasks": [
+        {
+          "id": "task_1",
+          "title": "Visit Plaza Bolívar",
+          "description": "Take a photo at Plaza Bolívar in the historic center of Caracas.",
+          "imageUrl": "https://example.com/images/caracas-plaza-bolivar.jpg"
+        }
+      ]
+    }
+  ]
+}
+
+2.2. New Schema: Add Optional location to Each Task
+
+We don’t break existing data—we just extend each task with an optional location object.
+
+New fields per task (proposed):
+
+location.name – human-readable place name (e.g., "Plaza Bolívar").
+
+location.address – optional string (for UI + fallback).
+
+location.latitude – number.
+
+location.longitude – number.
+
+Example with new fields added:
+
+{
+  "cities": [
+    {
+      "id": "caracas",
+      "name": "Caracas",
+      "tasks": [
+        {
+          "id": "task_1",
+          "title": "Visit Plaza Bolívar",
+          "description": "Take a photo at Plaza Bolívar in the historic center of Caracas.",
+          "imageUrl": "https://example.com/images/caracas-plaza-bolivar.jpg",
+          "location": {
+            "name": "Plaza Bolívar",
+            "address": "Plaza Bolívar, Caracas, Venezuela",
+            "latitude": 10.5065,
+            "longitude": -66.9146
+          }
+        }
+      ]
+    }
+  ]
+}
+
+2.3. Migration / Backfill
+
+We don’t require every existing task to immediately get coordinates.
+
+Behavior:
+
+If location is missing → no Navigation pill.
+
+If location exists but missing or invalid coordinates → treat as “no location.”
+
+So you can progressively enrich tasks with coordinates over time without breaking the app.
+
+3. Frontend Behavior – Task Card + Navigate Pill
+3.1. When to Show the Pill
+
+For each task card:
+
+Parse the task as usual.
+
+Check:
+
+const hasValidLocation =
+  task.location &&
+  typeof task.location.latitude === 'number' &&
+  typeof task.location.longitude === 'number' &&
+  Number.isFinite(task.location.latitude) &&
+  Number.isFinite(task.location.longitude);
+
+
+If hasValidLocation is true → render the floating Navigate pill.
+
+If false → do not render the pill at all.
+
+No disabled state; it’s simply present or not.
+
+3.2. Visual & Layout Requirements
+
+The task card already has an image container. The pill is positioned inside that container:
+
+Bottom-right corner.
+
+With padding (e.g., 8–12px from right and bottom edges).
+
+Style:
+
+Rounded pill (chip-like).
+
+Semi-opaque background for contrast (e.g., white or dark with some opacity).
+
+Contains:
+
+A location icon (e.g., 📍) and
+
+A label like "Navigate".
+
+Think: small but obviously tap-able, not overshadowing the main image.
+
+3.3. Interaction Requirements
+
+Tap on pill:
+
+Build a maps URL using task.location.latitude + task.location.longitude.
+
+Open the user’s maps app (or a new browser tab on web).
+
+Examples (you can pick one approach depending on platform):
+
+Web example:
+
+const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+window.open(url, '_blank', 'noopener');
+
+
+Mobile (e.g., React Native):
+
+Use a helper like Linking.openURL with:
+
+https://www.google.com/maps/search/?api=1&query=${lat},${lng}
+or platform-specific Apple/geo URL schemes.
+
+On tap:
+
+Show a pressed visual state (slight opacity change).
+
+Then call the maps deeplink.
+
+Error handling (minimal):
+
+If the open fails:
+
+Show a toast/snackbar:
+"Couldn't open maps. Please try again."
+
+3.4. Accessibility
+
+The pill must expose an accessible label:
+
+If location.name exists: "Navigate to Plaza Bolívar".
+
+Else: "Navigate to this location".
+
+It should be reachable and focusable for keyboard + screen readers.
