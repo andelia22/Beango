@@ -1,4 +1,5 @@
 import { type Server } from "node:http";
+import path from "path";
 
 import express, {
   type Express,
@@ -63,6 +64,11 @@ app.use((req, res, next) => {
 
   next();
 });
+
+const assetsPath = process.env.NODE_ENV === "production"
+  ? path.resolve(process.cwd(), "attached_assets")
+  : path.resolve(import.meta.dirname, "..", "attached_assets");
+app.use("/attached_assets", express.static(assetsPath));
 
 export default async function runApp(
   setup: (app: Express, server: Server) => Promise<void>,
