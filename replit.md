@@ -41,17 +41,19 @@ Preferred communication style: Simple, everyday language.
 - **Production Server**: Static file serving with bundled server code via esbuild
 - **Module System**: ES modules (type: "module" in package.json)
 
-**Current Storage**: In-memory storage implementation (MemStorage class)
-- User CRUD operations
-- City catalog loaded from JSON file with Zod validation
+**Storage**: DatabaseStorage class using PostgreSQL
+- All user and completion data persists to database via Drizzle ORM
+- City catalog loaded from JSON file with Zod validation (by design)
 - Room validation via client-side roomStore
-- Designed for easy migration to database-backed storage
+- Production-ready persistence with proper error handling
 
 **API Design**:
 - RESTful endpoints prefixed with `/api`
 - JSON request/response format
+- Authentication: GET /api/auth/user, POST /api/auth/logout
 - City endpoints: GET /api/cities, GET /api/cities/:cityId/challenges
-- Session-based request logging middleware
+- Completion endpoints: POST /api/beango-completions, GET /api/beango-completions
+- Session-based authentication via Replit Auth
 - Raw body capture for webhook support
 
 **City Catalog System**:
@@ -67,9 +69,11 @@ Preferred communication style: Simple, everyday language.
 - Schema definitions in `shared/schema.ts` using Drizzle's type-safe API
 - Zod integration for runtime validation via `drizzle-zod`
 - Current schema defines:
-  - User model (id, username, password)
-  - City schema (id, name, description, country, challengeCount)
-  - Challenge schema (id, caption, imageUrl)
+  - users table (id, email, firstName, lastName, profileImageUrl, createdAt, updatedAt)
+  - beango_completions table (id, userId, cityId, cityName, cityImageUrl, roomCode, participantCount, completedAt)
+  - sessions table (sid, sess, expire) - managed by connect-pg-simple
+  - City schema (id, name, description, country, challengeCount) - JSON-based
+  - Challenge schema (id, caption, imageUrl) - JSON-based
 
 **Database Strategy**:
 - Configured for Neon serverless PostgreSQL
@@ -77,7 +81,13 @@ Preferred communication style: Simple, everyday language.
 - Schema migrations managed via `drizzle-kit`
 - Shared types between client and server for type safety
 
-**Note**: While Drizzle is configured for PostgreSQL (Neon), the application currently uses in-memory storage. The database infrastructure is prepared but not yet actively used for persistence.
+**Active Database Usage**:
+- All user data and BeanGo completions persist to PostgreSQL
+- DatabaseStorage class implements IStorage interface using Drizzle ORM
+- Sessions managed via connect-pg-simple (PostgreSQL-backed)
+- Proper defaults injected: participantCount=1, cityImageUrl handled as nullable
+- Completions ordered by completed_at descending
+- UUID generation for missing IDs in upsertUser
 
 ### Application State Management
 
@@ -87,27 +97,36 @@ Preferred communication style: Simple, everyday language.
 - Query client configured with infinite stale time (no automatic refetching)
 
 **Data Flow**:
-1. Server loads and validates city catalog from JSON on startup
-2. Room creation: user selects city from API-fetched list
-3. Room code generated (6-character alphanumeric, ABC-123 format)
-4. Room stored in sessionStorage with cityId reference
-5. Hunt page fetches challenges from API using room's cityId
-6. Local state tracks task completion per user
-7. Submit (all tasks complete) triggers navigation to stats page
+1. User authenticates via Replit Auth (OAuth or email/password)
+2. Server loads and validates city catalog from JSON on startup
+3. Room creation: authenticated user selects city from API-fetched list
+4. Room code generated (6-character alphanumeric, ABC-123 format)
+5. Room stored in sessionStorage with cityId reference
+6. Hunt page fetches challenges from API using room's cityId
+7. Local state tracks task completion per user
+8. Submit (all tasks complete) saves to database and triggers navigation to stats page
+9. History and Profile pages query database for user's completions
 
 ### Route Structure
 
 **Pages**:
-- `/` - Welcome screen (create or join options)
-- `/create` - Room creation flow with city selection
-- `/join` - Room join flow with code input
-- `/hunt/:code` - Main task feed interface
-- `/stats/:code` - Completion statistics and leaderboard
+- `/` - Landing page with authentication (sign in required)
+- `/welcome` - Welcome screen (create or join options) - protected
+- `/create` - Room creation flow with city selection - protected
+- `/join` - Room join flow with code input - protected
+- `/hunt/:code` - Main task feed interface - protected
+- `/stats/:code` - Completion statistics and leaderboard - protected
+- `/profile` - User profile with stats (BeanGos completed, cities explored) - protected
+- `/history` - List of user's completed BeanGos with city images - protected
 
 **Navigation Flow**:
+- Landing (unauthenticated) → Sign In → Welcome
+- Welcome → Profile / History (footer navigation)
 - Welcome → Create → Code Display → Hunt
 - Welcome → Join (with validation) → Hunt
 - Hunt → Stats (on submit completion)
+- Stats → History (via navigation)
+- Any protected page → Landing (if not authenticated)
 
 ### Asset Management
 
@@ -164,5 +183,35 @@ Preferred communication style: Simple, everyday language.
 - **nanoid**: Unique ID generation (used in dev server)
 - **ws**: WebSocket library for Neon database connections
 
-### Session Management
-Session infrastructure is configured via `connect-pg-simple` but not actively implemented. The storage interface supports user operations but lacks authentication middleware.
+### Authentication & Session Management
+
+**Replit Auth Integration**:
+- OAuth providers: Google, GitHub, Facebook
+- Email/password authentication via Replit's hosted UI
+- Session management via express-session with PostgreSQL store (connect-pg-simple)
+- Session secret stored in environment variable SESSION_SECRET
+
+**Authentication Flow**:
+1. User clicks "Sign In to Start" on Landing page
+2. Redirected to /api/auth/login endpoint
+3. Replit Auth handles OAuth/email login
+4. User redirected back with authenticated session
+5. useAuth hook fetches user data from GET /api/auth/user
+6. Protected routes guard access to authenticated pages
+
+**Frontend Auth Infrastructure**:
+- `useAuth()` hook: Returns user object, loading/error states, isAuthenticated/isUnauthenticated flags
+- `ProtectedRoute`: Redirects to Landing if not authenticated, shows error UI on fetch failures
+- Proper 401 handling: Treats unauthorized as null user (not error state)
+- Error recovery: Retry button on auth failures
+
+**Backend Auth Middleware**:
+- `requireAuth`: Middleware that returns 401 if no session user
+- Applied to all protected API endpoints (completions, user data)
+- User ID from session used for database queries
+
+**Database Integration**:
+- User records created/updated on login via upsertUser
+- Completions linked to user via foreign key (user_id references users.id)
+- Sessions persisted to PostgreSQL sessions table
+- Proper cleanup on logout (session destroyed)
