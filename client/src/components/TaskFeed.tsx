@@ -13,9 +13,10 @@ interface TaskFeedProps {
   cityName: string;
   roomCode: string;
   tasks: Task[];
+  onSubmit: () => void;
 }
 
-export default function TaskFeed({ cityName, roomCode, tasks }: TaskFeedProps) {
+export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFeedProps) {
   const [taskStatuses, setTaskStatuses] = useState<Record<number, TaskStatus>>(
     tasks.reduce((acc, task) => ({ ...acc, [task.id]: "incomplete" as TaskStatus }), {})
   );
@@ -33,7 +34,7 @@ export default function TaskFeed({ cityName, roomCode, tasks }: TaskFeedProps) {
     setIsSubmitting(true);
     setTimeout(() => {
       setIsSubmitting(false);
-      alert("Scavenger hunt completed! 🎉");
+      onSubmit();
     }, 2000);
   };
 

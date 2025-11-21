@@ -6,6 +6,7 @@ export default function RoomCodeDisplayExample() {
       roomCode="XYZ-789"
       cityName="Caracas"
       onContinue={() => console.log("Starting hunt!")}
+      onBack={() => console.log("Back clicked")}
     />
   );
 }

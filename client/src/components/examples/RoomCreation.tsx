@@ -4,6 +4,7 @@ export default function RoomCreationExample() {
   return (
     <RoomCreation
       onCreateRoom={(city) => console.log("Creating room for:", city)}
+      onBack={() => console.log("Back clicked")}
     />
   );
 }

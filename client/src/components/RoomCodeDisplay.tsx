@@ -1,15 +1,16 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Copy, Check, ArrowRight } from "lucide-react";
+import { Copy, Check, ArrowRight, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 
 interface RoomCodeDisplayProps {
   roomCode: string;
   cityName: string;
   onContinue: () => void;
+  onBack: () => void;
 }
 
-export default function RoomCodeDisplay({ roomCode, cityName, onContinue }: RoomCodeDisplayProps) {
+export default function RoomCodeDisplay({ roomCode, cityName, onContinue, onBack }: RoomCodeDisplayProps) {
   const [copied, setCopied] = useState(false);
 
   const copyRoomCode = () => {
@@ -22,6 +23,17 @@ export default function RoomCodeDisplay({ roomCode, cityName, onContinue }: Room
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-primary/5 via-background to-chart-2/5">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
+          <div className="flex items-center justify-between mb-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onBack}
+              data-testid="button-back-from-code"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div className="flex-1" />
+          </div>
           <CardTitle className="text-2xl">Room Created!</CardTitle>
           <CardDescription>
             Share this code with your friends to join the {cityName} scavenger hunt

@@ -40,5 +40,5 @@ export default function TaskFeedExample() {
     }
   ];
 
-  return <TaskFeed cityName="Caracas" roomCode="ABC-123" tasks={tasks} />;
+  return <TaskFeed cityName="Caracas" roomCode="ABC-123" tasks={tasks} onSubmit={() => console.log("Hunt submitted!")} />;
 }

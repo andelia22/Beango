@@ -1,4 +1,4 @@
-import { useRoute } from "wouter";
+import { useRoute, useLocation } from "wouter";
 import TaskFeed from "@/components/TaskFeed";
 import plazaImage from '@assets/generated_images/plaza_bolivar_colonial_buildings.png';
 import arepaImage from '@assets/generated_images/venezuelan_arepa_food_photo.png';
@@ -27,6 +27,7 @@ import performerImage from '@assets/generated_images/street_performer_scene.png'
 
 export default function Hunt() {
   const [, params] = useRoute("/hunt/:code");
+  const [, setLocation] = useLocation();
   const roomCode = params?.code || "DEMO-123";
 
   const tasks = [
@@ -61,6 +62,7 @@ export default function Hunt() {
       cityName="Caracas"
       roomCode={roomCode}
       tasks={tasks}
+      onSubmit={() => setLocation(`/stats/${roomCode}`)}
     />
   );
 }

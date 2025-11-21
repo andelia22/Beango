@@ -34,9 +34,10 @@ export default function Create() {
         roomCode={roomCode}
         cityName={cityName}
         onContinue={handleContinue}
+        onBack={() => setRoomCode(null)}
       />
     );
   }
 
-  return <RoomCreation onCreateRoom={handleCreateRoom} />;
+  return <RoomCreation onCreateRoom={handleCreateRoom} onBack={() => setLocation("/")} />;
 }

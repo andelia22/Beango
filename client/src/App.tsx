@@ -8,6 +8,7 @@ import Welcome from "@/pages/Welcome";
 import Create from "@/pages/Create";
 import Join from "@/pages/Join";
 import Hunt from "@/pages/Hunt";
+import Stats from "@/pages/Stats";
 
 function Router() {
   return (
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/create" component={Create} />
       <Route path="/join" component={Join} />
       <Route path="/hunt/:code" component={Hunt} />
+      <Route path="/stats/:code" component={Stats} />
       <Route component={NotFound} />
     </Switch>
   );
