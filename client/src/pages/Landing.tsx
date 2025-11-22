@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { MapPin, Users, Trophy } from "lucide-react";
+import mascotImage from "@assets/coming-soon-real_1763827924724.png";
 
 export default function Landing() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -28,9 +29,12 @@ export default function Landing() {
       <Card className="max-w-md w-full">
         <CardHeader className="text-center space-y-2">
           <div className="flex justify-center mb-4">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center">
-              <MapPin className="w-10 h-10 text-white" />
-            </div>
+            <img 
+              src={mascotImage} 
+              alt="BeanGo Mascot" 
+              className="w-32 h-auto"
+              data-testid="img-mascot"
+            />
           </div>
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-pink-700 bg-clip-text text-transparent">
             Welcome to BeanGo
