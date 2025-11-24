@@ -35,12 +35,13 @@ export async function setupAuth(app: Express) {
       const { idToken } = req.body;
       
       if (!idToken) {
-        return res.status(400).json({ error: "ID token required" });
+        return res.status(400).json({ message: "ID token required" });
       }
 
       const admin = getFirebaseAdmin();
       if (!admin) {
-        return res.status(500).json({ error: "Firebase not configured" });
+        console.error("Firebase Admin SDK not initialized");
+        return res.status(500).json({ message: "Authentication service unavailable" });
       }
 
       const decodedToken = await admin.auth().verifyIdToken(idToken);
@@ -63,9 +64,32 @@ export async function setupAuth(app: Express) {
       };
 
       res.json({ success: true });
-    } catch (error) {
-      console.error("Firebase login error:", error);
-      res.status(401).json({ error: "Invalid token" });
+    } catch (error: any) {
+      console.error("Firebase login error:", {
+        code: error.code,
+        message: error.message,
+        stack: error.stack,
+        details: error
+      });
+      
+      if (error.code === 'auth/id-token-expired') {
+        return res.status(401).json({ message: "Session expired. Please sign in again." });
+      }
+      if (error.code === 'auth/invalid-id-token' || error.code === 'auth/argument-error') {
+        return res.status(401).json({ message: "Invalid authentication token" });
+      }
+      if (error.code === 'auth/user-not-found') {
+        return res.status(401).json({ message: "User account not found" });
+      }
+      if (error.code === 'auth/network-request-failed' || error.code === 'auth/network-error') {
+        return res.status(503).json({ message: "Network error. Please check your connection and try again." });
+      }
+      if (error.code === 'auth/internal-error' || error.code === 'auth/invalid-credential') {
+        return res.status(500).json({ message: "Internal error. Please try again later." });
+      }
+      
+      console.error("Unmapped Firebase error code:", error.code);
+      res.status(500).json({ message: "Authentication failed. Please try again." });
     }
   });
 

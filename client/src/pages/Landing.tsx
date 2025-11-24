@@ -7,6 +7,7 @@ import { MapPin, Users, Trophy } from "lucide-react";
 import mascotImage from "@assets/coming-soon-real_1763827924724.png";
 import { signInWithGoogle } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 
 export default function Landing() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -17,12 +18,13 @@ export default function Landing() {
     setIsSigningIn(true);
     try {
       await signInWithGoogle();
-      window.location.reload();
-    } catch (error) {
+      await queryClient.fetchQuery({ queryKey: ['/api/auth/user'] });
+      setIsSigningIn(false);
+    } catch (error: any) {
       console.error('Sign in error:', error);
       toast({
         title: "Sign in failed",
-        description: "Please try again",
+        description: error.message || "Please try again",
         variant: "destructive",
       });
       setIsSigningIn(false);

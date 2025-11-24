@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
 import { signInWithGoogle } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 
 export function AppFooter() {
   const { isAuthenticated } = useAuth();
@@ -14,12 +15,13 @@ export function AppFooter() {
     setIsSigningIn(true);
     try {
       await signInWithGoogle();
-      window.location.reload();
-    } catch (error) {
+      await queryClient.fetchQuery({ queryKey: ['/api/auth/user'] });
+      setIsSigningIn(false);
+    } catch (error: any) {
       console.error('Sign in error:', error);
       toast({
         title: "Sign in failed",
-        description: "Please try again",
+        description: error.message || "Please try again",
         variant: "destructive",
       });
       setIsSigningIn(false);

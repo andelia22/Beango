@@ -1,11 +1,16 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut } from "firebase/auth";
+import { 
+  getAuth, 
+  GoogleAuthProvider, 
+  signInWithPopup,
+  signOut as firebaseSignOut 
+} from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebasestorage.app`,
+  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.appspot.com`,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
@@ -18,15 +23,30 @@ export async function signInWithGoogle() {
     const result = await signInWithPopup(auth, googleProvider);
     const idToken = await result.user.getIdToken();
     
-    await fetch('/api/auth/firebase-login', {
+    const response = await fetch('/api/auth/firebase-login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ idToken }),
       credentials: 'include'
     });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Authentication failed' }));
+      throw new Error(errorData.message);
+    }
     
     return result.user;
-  } catch (error) {
+  } catch (error: any) {
+    if (error.code === 'auth/popup-blocked') {
+      const popupError = new Error('Popup was blocked by your browser. Please allow popups for this site and try again.');
+      (popupError as any).code = 'auth/popup-blocked';
+      throw popupError;
+    }
+    if (error.code === 'auth/popup-closed-by-user') {
+      const cancelError = new Error('Sign in was cancelled');
+      (cancelError as any).code = 'auth/popup-closed-by-user';
+      throw cancelError;
+    }
     console.error('Error signing in with Google:', error);
     throw error;
   }
