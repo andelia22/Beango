@@ -1,17 +1,25 @@
 import { useEffect } from "react";
 import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 import mascotImage from "@assets/coming-soon-real_1763827924724.png";
 
 export default function LoadingScreen() {
   const [, setLocation] = useLocation();
+  const { isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
+    if (isLoading) return;
+    
     const timer = setTimeout(() => {
-      setLocation("/interests");
+      if (isAuthenticated) {
+        setLocation("/welcome");
+      } else {
+        setLocation("/interests");
+      }
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [setLocation]);
+  }, [setLocation, isAuthenticated, isLoading]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-pink-100 dark:from-gray-900 dark:to-gray-800">

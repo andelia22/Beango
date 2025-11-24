@@ -123,7 +123,7 @@ export default function Profile() {
                 Back to Welcome
               </Button>
               <Button
-                onClick={() => window.location.href = "/api/logout"}
+                onClick={() => window.location.href = "/api/auth/logout"}
                 variant="outline"
                 className="w-full"
                 data-testid="button-logout"
