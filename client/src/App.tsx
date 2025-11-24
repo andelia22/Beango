@@ -3,7 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { AuthProvider } from "@/providers/AuthProvider";
 import { AppFooter } from "@/components/AppFooter";
 import { DataMigrationHandler } from "@/components/DataMigrationHandler";
 import NotFound from "@/pages/not-found";
@@ -38,10 +38,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <DataMigrationHandler />
-        <Toaster />
-        <Router />
-        <AppFooter />
+        <AuthProvider>
+          <DataMigrationHandler />
+          <Toaster />
+          <Router />
+          <AppFooter />
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

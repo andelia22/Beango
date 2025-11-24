@@ -1,16 +1,15 @@
 import { useState } from "react";
 import { Redirect } from "wouter";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthContext } from "@/providers/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { MapPin, Users, Trophy } from "lucide-react";
 import mascotImage from "@assets/coming-soon-real_1763827924724.png";
 import { signInWithGoogle } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
 
 export default function Landing() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, refreshAuth } = useAuthContext();
   const { toast } = useToast();
   const [isSigningIn, setIsSigningIn] = useState(false);
 
@@ -18,7 +17,7 @@ export default function Landing() {
     setIsSigningIn(true);
     try {
       await signInWithGoogle();
-      await queryClient.fetchQuery({ queryKey: ['/api/auth/user'] });
+      await refreshAuth();
       setIsSigningIn(false);
     } catch (error: any) {
       console.error('Sign in error:', error);

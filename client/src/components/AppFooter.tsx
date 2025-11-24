@@ -1,13 +1,12 @@
 import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthContext } from "@/providers/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
 import { signInWithGoogle } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
 
 export function AppFooter() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, refreshAuth } = useAuthContext();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const { toast } = useToast();
 
@@ -15,7 +14,7 @@ export function AppFooter() {
     setIsSigningIn(true);
     try {
       await signInWithGoogle();
-      await queryClient.fetchQuery({ queryKey: ['/api/auth/user'] });
+      await refreshAuth();
       setIsSigningIn(false);
     } catch (error: any) {
       console.error('Sign in error:', error);

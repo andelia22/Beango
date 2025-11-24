@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { X, LogIn } from "lucide-react";
 import { signInWithGoogle } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
+import { useAuthContext } from "@/providers/AuthProvider";
 
 interface SignInPromptProps {
   message?: string;
@@ -20,6 +20,7 @@ export function SignInPrompt({
   const [isVisible, setIsVisible] = useState(true);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const { toast } = useToast();
+  const { refreshAuth } = useAuthContext();
 
   const handleDismiss = () => {
     setIsVisible(false);
@@ -32,7 +33,7 @@ export function SignInPrompt({
     setIsSigningIn(true);
     try {
       await signInWithGoogle();
-      await queryClient.fetchQuery({ queryKey: ['/api/auth/user'] });
+      await refreshAuth();
       setIsSigningIn(false);
     } catch (error: any) {
       console.error('Sign in error:', error);

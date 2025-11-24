@@ -105,4 +105,6 @@ Preferred communication style: Simple, everyday language.
   - **Provider**: Google.
   - **SDKs**: Firebase Client SDK (frontend), Firebase Admin SDK (backend).
   - **Session**: `express-session` with `connect-pg-simple` (PostgreSQL store).
+  - **Auth Flow**: signInWithPopup → backend session creation → AuthProvider.refreshAuth() → query invalidation
+  - **State Management**: Top-level AuthProvider mounts useAuth once, exposes refreshAuth() for sign-in handlers. This ensures query cache consistency while preserving SPA flow and anonymous data migration.
 - **Deployment Requirements**: Firebase environment variables and authorized domains configured for production.
