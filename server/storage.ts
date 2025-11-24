@@ -34,6 +34,7 @@ function loadCityCatalog(): CityCatalog {
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  saveUserInterests(userId: string, interests: string[]): Promise<User>;
   getCities(): Promise<City[]>;
   getCity(cityId: string): Promise<City | undefined>;
   getCityChallenges(cityId: string): Promise<Challenge[]>;
@@ -64,11 +65,26 @@ export class MemStorage implements IStorage {
       firstName: userData.firstName || null,
       lastName: userData.lastName || null,
       profileImageUrl: userData.profileImageUrl || null,
+      interests: userData.interests || null,
       createdAt: existing?.createdAt || new Date(),
       updatedAt: new Date(),
     };
     this.users.set(user.id, user);
     return user;
+  }
+
+  async saveUserInterests(userId: string, interests: string[]): Promise<User> {
+    const user = this.users.get(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const updatedUser: User = {
+      ...user,
+      interests,
+      updatedAt: new Date(),
+    };
+    this.users.set(userId, updatedUser);
+    return updatedUser;
   }
 
   async getCities(): Promise<City[]> {
@@ -134,6 +150,7 @@ export class DatabaseStorage implements IStorage {
           firstName: userData.firstName ?? existing.firstName,
           lastName: userData.lastName ?? existing.lastName,
           profileImageUrl: userData.profileImageUrl ?? existing.profileImageUrl,
+          interests: userData.interests ?? existing.interests,
           updatedAt: new Date(),
         })
         .where(eq(usersTable.id, userId))
@@ -148,10 +165,28 @@ export class DatabaseStorage implements IStorage {
           firstName: userData.firstName,
           lastName: userData.lastName,
           profileImageUrl: userData.profileImageUrl,
+          interests: userData.interests,
         })
         .returning();
       return inserted[0];
     }
+  }
+
+  async saveUserInterests(userId: string, interests: string[]): Promise<User> {
+    const updated = await db
+      .update(usersTable)
+      .set({
+        interests,
+        updatedAt: new Date(),
+      })
+      .where(eq(usersTable.id, userId))
+      .returning();
+    
+    if (!updated[0]) {
+      throw new Error("User not found");
+    }
+    
+    return updated[0];
   }
 
   async getCities(): Promise<City[]> {

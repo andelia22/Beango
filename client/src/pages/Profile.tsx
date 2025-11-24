@@ -4,8 +4,9 @@ import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, MapPin, Home, LogIn } from "lucide-react";
+import { Trophy, MapPin, Home, LogIn, Edit } from "lucide-react";
 import type { BeangoCompletion } from "@shared/schema";
 
 export default function Profile() {
@@ -111,6 +112,54 @@ export default function Profile() {
                 <div className="text-sm text-muted-foreground">Cities Explored</div>
               </div>
             </div>
+
+            {user.interests && user.interests.length > 0 && (
+              <div className="pt-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold">Your Interests</h3>
+                  <Button
+                    onClick={() => setLocation("/interests?edit=true")}
+                    variant="ghost"
+                    size="sm"
+                    data-testid="button-edit-interests"
+                  >
+                    <Edit className="w-3 h-3 mr-1" />
+                    Edit
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {user.interests.map((interest) => (
+                    <Badge
+                      key={interest}
+                      variant="secondary"
+                      className="text-sm"
+                      data-testid={`badge-interest-${interest.toLowerCase().replace(/\s+/g, "-")}`}
+                    >
+                      {interest}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {(!user.interests || user.interests.length === 0) && (
+              <div className="pt-4 space-y-3">
+                <div className="text-center p-4 rounded-lg bg-pink-50 dark:bg-pink-900/20">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Share your interests to personalize your BeanGo experience
+                  </p>
+                  <Button
+                    onClick={() => setLocation("/interests?edit=true")}
+                    variant="outline"
+                    size="sm"
+                    data-testid="button-add-interests"
+                  >
+                    <Edit className="w-3 h-3 mr-1" />
+                    Add Interests
+                  </Button>
+                </div>
+              </div>
+            )}
 
             <div className="pt-4 space-y-3">
               <Button

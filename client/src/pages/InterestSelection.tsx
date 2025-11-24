@@ -1,6 +1,10 @@
 import { useLocation } from "wouter";
+import { useMutation } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 import { PillSelector } from "@/components/PillSelector";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import mascotImage from "@assets/coming-soon-real_1763827924724.png";
 
 const TRAVEL_INTERESTS = [
@@ -20,16 +24,54 @@ const TRAVEL_INTERESTS = [
 ];
 
 export default function InterestSelection() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
+  const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
+  
+  const isEditMode = new URLSearchParams(location.split('?')[1]).get('edit') === 'true';
+  const initialInterests = isEditMode && user?.interests ? user.interests : [];
 
-  const handleNext = (selected: string[]) => {
-    localStorage.setItem("userInterests", JSON.stringify(selected));
-    setLocation("/welcome");
+  const saveInterestsMutation = useMutation({
+    mutationFn: async (interests: string[]) => {
+      return apiRequest("PATCH", "/api/auth/user/interests", { interests });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      toast({
+        title: "Interests saved",
+        description: "Your interests have been updated successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to save interests. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleNext = async (selected: string[]) => {
+    if (isAuthenticated) {
+      await saveInterestsMutation.mutateAsync(selected);
+      if (isEditMode) {
+        setLocation("/profile");
+      } else {
+        setLocation("/welcome");
+      }
+    } else {
+      localStorage.setItem("userInterests", JSON.stringify(selected));
+      setLocation("/welcome");
+    }
   };
 
   const handleSkip = () => {
-    localStorage.removeItem("userInterests");
-    setLocation("/welcome");
+    if (isEditMode) {
+      setLocation("/profile");
+    } else {
+      localStorage.removeItem("userInterests");
+      setLocation("/welcome");
+    }
   };
 
   return (
@@ -55,11 +97,12 @@ export default function InterestSelection() {
         <CardContent className="space-y-4 md:space-y-6 pt-0 pb-4 md:pb-6">
           <PillSelector
             options={TRAVEL_INTERESTS}
+            initialSelected={initialInterests}
             onNext={handleNext}
             onSkip={handleSkip}
-            nextButtonText="Next"
-            skipButtonText="Skip for now"
-            requireMinSelection={true}
+            nextButtonText={isEditMode ? "Save Changes" : "Next"}
+            skipButtonText={isEditMode ? "Cancel" : "Skip for now"}
+            requireMinSelection={!isEditMode}
           />
         </CardContent>
       </Card>

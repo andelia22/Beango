@@ -4,12 +4,21 @@ import { apiRequest } from "./queryClient";
 export async function migrateAnonymousDataToAccount(): Promise<void> {
   const anonymousData = getAllAnonymousData();
   
-  if (anonymousData.beanGoCompletions.length === 0) {
+  const interestsData = localStorage.getItem("userInterests");
+  const interests = interestsData ? JSON.parse(interestsData) : null;
+  
+  if (anonymousData.beanGoCompletions.length === 0 && !interests) {
     console.log("No anonymous data to migrate");
     return;
   }
 
   try {
+    if (interests && Array.isArray(interests) && interests.length > 0) {
+      await apiRequest("PATCH", "/api/auth/user/interests", { interests });
+      localStorage.removeItem("userInterests");
+      console.log(`Migrated ${interests.length} interests to account`);
+    }
+
     for (const completion of anonymousData.beanGoCompletions) {
       await apiRequest("POST", "/api/beango-completions", {
         cityId: completion.cityId,
@@ -21,8 +30,10 @@ export async function migrateAnonymousDataToAccount(): Promise<void> {
       });
     }
 
-    clearAnonymousData();
-    console.log(`Migrated ${anonymousData.beanGoCompletions.length} anonymous completions to account`);
+    if (anonymousData.beanGoCompletions.length > 0) {
+      clearAnonymousData();
+      console.log(`Migrated ${anonymousData.beanGoCompletions.length} anonymous completions to account`);
+    }
   } catch (error) {
     console.error("Failed to migrate anonymous data:", error);
     throw error;

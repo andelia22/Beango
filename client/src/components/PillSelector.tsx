@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 interface PillSelectorProps {
   options: string[];
+  initialSelected?: string[];
   onNext: (selected: string[]) => void;
   onSkip?: () => void;
   nextButtonText?: string;
@@ -13,13 +14,18 @@ interface PillSelectorProps {
 
 export function PillSelector({
   options,
+  initialSelected = [],
   onNext,
   onSkip,
   nextButtonText = "Next",
   skipButtonText = "Skip",
   requireMinSelection = true,
 }: PillSelectorProps) {
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string[]>(initialSelected);
+
+  useEffect(() => {
+    setSelected(initialSelected);
+  }, [initialSelected]);
 
   const toggleSelection = (option: string) => {
     setSelected(prev =>

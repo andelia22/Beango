@@ -21,6 +21,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/auth/user/interests", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { interests } = req.body;
+      
+      if (!Array.isArray(interests)) {
+        return res.status(400).json({ error: "Interests must be an array" });
+      }
+      
+      const user = await storage.saveUserInterests(userId, interests);
+      res.json(user);
+    } catch (error) {
+      console.error("Error saving interests:", error);
+      res.status(500).json({ error: "Failed to save interests" });
+    }
+  });
+
   app.get("/api/cities", async (_req, res) => {
     try {
       const cities = await storage.getCities();
