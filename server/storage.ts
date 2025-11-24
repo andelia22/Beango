@@ -148,11 +148,23 @@ export class DatabaseStorage implements IStorage {
 
   async upsertUser(userData: UpsertUser): Promise<User> {
     const userId = userData.id || randomUUID();
-    const existing = await this.getUser(userId);
+    
+    let existing: User | undefined;
+    
+    if (userData.email) {
+      const resultByEmail = await db.select().from(usersTable).where(eq(usersTable.email, userData.email));
+      existing = resultByEmail[0];
+    }
+    
+    if (!existing) {
+      existing = await this.getUser(userId);
+    }
+    
     if (existing) {
       const updated = await db
         .update(usersTable)
         .set({
+          id: userId,
           email: userData.email ?? existing.email,
           firstName: userData.firstName ?? existing.firstName,
           lastName: userData.lastName ?? existing.lastName,
@@ -160,7 +172,7 @@ export class DatabaseStorage implements IStorage {
           interests: userData.interests ?? existing.interests,
           updatedAt: new Date(),
         })
-        .where(eq(usersTable.id, userId))
+        .where(eq(usersTable.id, existing.id))
         .returning();
       return updated[0];
     } else {
