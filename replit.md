@@ -53,6 +53,7 @@ Preferred communication style: Simple, everyday language.
 - Authentication: GET /api/auth/user, POST /api/auth/logout
 - City endpoints: GET /api/cities, GET /api/cities/:cityId/challenges
 - Completion endpoints: POST /api/beango-completions, GET /api/beango-completions
+- User preferences: PATCH /api/auth/user/interests
 - Session-based authentication via Replit Auth
 - Raw body capture for webhook support
 
@@ -69,7 +70,7 @@ Preferred communication style: Simple, everyday language.
 - Schema definitions in `shared/schema.ts` using Drizzle's type-safe API
 - Zod integration for runtime validation via `drizzle-zod`
 - Current schema defines:
-  - users table (id, email, firstName, lastName, profileImageUrl, createdAt, updatedAt)
+  - users table (id, email, firstName, lastName, profileImageUrl, interests, createdAt, updatedAt)
   - beango_completions table (id, userId, cityId, cityName, cityImageUrl, roomCode, participantCount, completedAt)
   - sessions table (sid, sess, expire) - managed by connect-pg-simple
   - City schema (id, name, description, country, challengeCount) - JSON-based
@@ -111,17 +112,21 @@ Preferred communication style: Simple, everyday language.
 
 **Pages**:
 - `/` - Landing page with authentication (sign in required)
+- `/interests` - Interest selection page (onboarding for new users)
+- `/interests?edit=true` - Interest editing page (from profile)
 - `/welcome` - Welcome screen (create or join options) - protected
 - `/create` - Room creation flow with city selection - protected
 - `/join` - Room join flow with code input - protected
 - `/hunt/:code` - Main task feed interface - protected
 - `/stats/:code` - Completion statistics and leaderboard - protected
-- `/profile` - User profile with stats (BeanGos completed, cities explored) - protected
+- `/profile` - User profile with stats and interests - protected
 - `/history` - List of user's completed BeanGos with city images - protected
 
 **Navigation Flow**:
-- Landing (unauthenticated) → Sign In → Welcome
+- Landing (unauthenticated) → Interests (onboarding) → Welcome
+- Landing (unauthenticated) → Sign In → LoadingScreen (migration) → Welcome
 - Welcome → Profile / History (footer navigation)
+- Profile → Interests?edit=true (edit mode) → Profile
 - Welcome → Create → Code Display → Hunt
 - Welcome → Join (with validation) → Hunt
 - Hunt → Stats (on submit completion)
@@ -215,3 +220,48 @@ Preferred communication style: Simple, everyday language.
 - Completions linked to user via foreign key (user_id references users.id)
 - Sessions persisted to PostgreSQL sessions table
 - Proper cleanup on logout (session destroyed)
+
+### User Interests System
+
+**Overview**:
+- Persistent user preference system for personalizing the BeanGo experience
+- Supports both anonymous (localStorage) and authenticated (database) storage
+- Seamless migration from anonymous to authenticated state
+- 13 interest categories: Food & Drink, Art & Creativity, Photo & Video Challenges, Nature & Outdoors, Culture & History, Shopping & Markets, Puzzles & Clues, Social & Interaction, Movement & Exploration, Sports & Play, Nightlife & Ambience, Audio / Sound-Based, Group Challenges
+
+**Database Schema**:
+- interests field in users table: text().array() for storing string array
+- Nullable to support users who haven't selected interests yet
+- Updated via PATCH /api/auth/user/interests endpoint
+
+**Interest Selection UI** (`/interests`):
+- **Onboarding Mode** (default): New users select interests during first-time setup
+  - Displays "Next" and "Skip for now" buttons
+  - Anonymous users: Saves to localStorage (key: "userInterests")
+  - Authenticated users: Saves to database via API
+  - Navigates to /welcome after completion
+- **Edit Mode** (?edit=true): Existing users update their interests from profile
+  - Displays "Save Changes" and "Cancel" buttons
+  - Pre-populates current interests from database
+  - Saves changes to database
+  - Navigates back to /profile after save/cancel
+
+**PillSelector Component**:
+- Reusable component for multi-select interest pills
+- Uses useEffect to sync with initialSelected prop for async data loading
+- Supports minimum selection requirement (configurable)
+- Visual feedback for selected/unselected states
+
+**Data Migration**:
+- Triggered in LoadingScreen when user transitions from anonymous to authenticated
+- migrateAnonymousDataToAccount() in client/src/lib/dataMigration.ts
+- Reads interests from localStorage (key: "userInterests")
+- Saves to database via PATCH /api/auth/user/interests
+- Clears localStorage after successful migration
+- Uses useRef to ensure migration only runs once per session
+
+**Profile Display**:
+- Shows interests as read-only badges if user has selected any
+- "Edit" button navigates to /interests?edit=true for updates
+- Empty state displays "Add Interests" button with personalization message
+- Seamlessly integrates with existing profile stats (BeanGos completed, cities explored)
