@@ -1,18 +1,19 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated } from "./firebaseAuth";
 import { insertBeangoCompletionSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   await setupAuth(app);
 
   app.get("/api/auth/user", async (req: any, res) => {
-    if (!req.isAuthenticated() || !req.user) {
+    const sessionUser = (req.session as any).user;
+    if (!sessionUser || !sessionUser.uid) {
       return res.status(401).json({ message: "Unauthorized" });
     }
     try {
-      const userId = req.user.claims.sub;
+      const userId = sessionUser.uid;
       const user = await storage.getUser(userId);
       res.json(user);
     } catch (error) {
@@ -23,7 +24,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/auth/user/interests", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.session as any).user.uid;
       const { interests } = req.body;
       
       if (!Array.isArray(interests)) {
@@ -67,7 +68,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/beango-completions", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.session as any).user.uid;
       const validatedData = insertBeangoCompletionSchema.parse({
         ...req.body,
         userId,
@@ -82,7 +83,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/beango-completions", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.session as any).user.uid;
       const completions = await storage.getUserCompletions(userId);
       res.json(completions);
     } catch (error) {

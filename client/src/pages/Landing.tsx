@@ -1,13 +1,33 @@
-import { useEffect } from "react";
+import { useState } from "react";
 import { Redirect } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { MapPin, Users, Trophy } from "lucide-react";
 import mascotImage from "@assets/coming-soon-real_1763827924724.png";
+import { signInWithGoogle } from "@/lib/firebase";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Landing() {
   const { isAuthenticated, isLoading } = useAuth();
+  const { toast } = useToast();
+  const [isSigningIn, setIsSigningIn] = useState(false);
+
+  const handleSignIn = async () => {
+    setIsSigningIn(true);
+    try {
+      await signInWithGoogle();
+      window.location.reload();
+    } catch (error) {
+      console.error('Sign in error:', error);
+      toast({
+        title: "Sign in failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+      setIsSigningIn(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -82,15 +102,16 @@ export default function Landing() {
 
           <div className="pt-4">
             <Button
-              onClick={() => window.location.href = "/api/login"}
+              onClick={handleSignIn}
               className="w-full"
               size="lg"
               data-testid="button-login"
+              disabled={isSigningIn}
             >
-              Sign In to Start
+              {isSigningIn ? "Signing in..." : "Sign In with Google"}
             </Button>
             <p className="text-xs text-center text-muted-foreground mt-3">
-              Sign in with Google, GitHub, or Email
+              Secure authentication powered by Firebase
             </p>
           </div>
         </CardContent>
