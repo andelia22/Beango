@@ -9,6 +9,7 @@ import express, {
 } from "express";
 
 import { registerRoutes } from "./routes";
+import { initializeFirebaseAdmin } from "./firebaseAdmin";
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
@@ -71,6 +72,8 @@ app.use("/attached_assets", express.static(assetsPath));
 export default async function runApp(
   setup: (app: Express, server: Server) => Promise<void>,
 ) {
+  initializeFirebaseAdmin();
+  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

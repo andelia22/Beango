@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -7,11 +8,48 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Trophy, MapPin, Home, LogIn, Edit } from "lucide-react";
+import { signInWithGoogle, signOut } from "@/lib/firebase";
+import { useToast } from "@/hooks/use-toast";
 import type { BeangoCompletion } from "@shared/schema";
 
 export default function Profile() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const { toast } = useToast();
+
+  const handleSignIn = async () => {
+    setIsSigningIn(true);
+    try {
+      await signInWithGoogle();
+      window.location.reload();
+    } catch (error) {
+      console.error('Sign in error:', error);
+      toast({
+        title: "Sign in failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+      setIsSigningIn(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      await signOut();
+      window.location.href = "/";
+    } catch (error) {
+      console.error('Sign out error:', error);
+      toast({
+        title: "Sign out failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+      setIsSigningOut(false);
+    }
+  };
 
   const { data: completions = [], isLoading: completionsLoading } = useQuery<BeangoCompletion[]>({
     queryKey: ["/api/beango-completions"],
@@ -48,12 +86,13 @@ export default function Profile() {
             </div>
             <div className="space-y-2">
               <Button
-                onClick={() => window.location.href = "/api/auth/login"}
+                onClick={handleSignIn}
                 className="w-full"
                 data-testid="button-signin"
+                disabled={isSigningIn}
               >
                 <LogIn className="w-4 h-4 mr-2" />
-                Sign In
+                {isSigningIn ? "Signing in..." : "Sign In"}
               </Button>
               <Button
                 onClick={() => setLocation("/welcome")}
@@ -172,12 +211,13 @@ export default function Profile() {
                 Back to Welcome
               </Button>
               <Button
-                onClick={() => window.location.href = "/api/auth/logout"}
+                onClick={handleSignOut}
                 variant="outline"
                 className="w-full"
                 data-testid="button-logout"
+                disabled={isSigningOut}
               >
-                Sign Out
+                {isSigningOut ? "Signing out..." : "Sign Out"}
               </Button>
             </div>
           </CardContent>

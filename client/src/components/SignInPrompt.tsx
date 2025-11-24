@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { X, LogIn } from "lucide-react";
+import { signInWithGoogle } from "@/lib/firebase";
+import { useToast } from "@/hooks/use-toast";
 
 interface SignInPromptProps {
   message?: string;
@@ -15,6 +17,8 @@ export function SignInPrompt({
   suppressAfterDismiss = false
 }: SignInPromptProps) {
   const [isVisible, setIsVisible] = useState(true);
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const { toast } = useToast();
 
   const handleDismiss = () => {
     setIsVisible(false);
@@ -23,8 +27,20 @@ export function SignInPrompt({
     }
   };
 
-  const handleSignIn = () => {
-    window.location.href = "/api/auth/login";
+  const handleSignIn = async () => {
+    setIsSigningIn(true);
+    try {
+      await signInWithGoogle();
+      window.location.reload();
+    } catch (error) {
+      console.error('Sign in error:', error);
+      toast({
+        title: "Sign in failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+      setIsSigningIn(false);
+    }
   };
 
   if (!isVisible) {
@@ -50,8 +66,9 @@ export function SignInPrompt({
                   size="sm"
                   className="flex-1"
                   data-testid="button-signin-prompt"
+                  disabled={isSigningIn}
                 >
-                  Sign In
+                  {isSigningIn ? "Signing in..." : "Sign In"}
                 </Button>
                 <Button
                   onClick={handleDismiss}

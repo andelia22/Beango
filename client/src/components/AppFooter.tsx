@@ -1,9 +1,30 @@
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
+import { signInWithGoogle } from "@/lib/firebase";
+import { useToast } from "@/hooks/use-toast";
 
 export function AppFooter() {
   const { isAuthenticated } = useAuth();
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const { toast } = useToast();
+
+  const handleSignIn = async () => {
+    setIsSigningIn(true);
+    try {
+      await signInWithGoogle();
+      window.location.reload();
+    } catch (error) {
+      console.error('Sign in error:', error);
+      toast({
+        title: "Sign in failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+      setIsSigningIn(false);
+    }
+  };
 
   if (isAuthenticated) {
     return null;
@@ -13,14 +34,15 @@ export function AppFooter() {
     <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-t border-border z-40">
       <div className="max-w-4xl mx-auto px-4 py-3">
         <Button
-          onClick={() => window.location.href = "/api/auth/login"}
+          onClick={handleSignIn}
           variant="ghost"
           size="sm"
           className="w-full text-muted-foreground"
           data-testid="button-footer-signin"
+          disabled={isSigningIn}
         >
           <LogIn className="w-4 h-4 mr-2" />
-          Sign In
+          {isSigningIn ? "Signing in..." : "Sign In"}
         </Button>
       </div>
     </div>
