@@ -1,7 +1,6 @@
 import { useLocation } from "wouter";
 import { PillSelector } from "@/components/PillSelector";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { MapPin, Users, Trophy } from "lucide-react";
 import mascotImage from "@assets/coming-soon-real_1763827924724.png";
 
 const TRAVEL_INTERESTS = [
@@ -54,43 +53,7 @@ export default function InterestSelection() {
         </CardHeader>
         
         <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-pink-100 dark:bg-pink-900/20 flex items-center justify-center flex-shrink-0">
-                <MapPin className="w-5 h-5 text-pink-600 dark:text-pink-400" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-sm">24 Challenges Per City</h3>
-                <p className="text-sm text-muted-foreground">
-                  Complete location-based tasks and discover hidden gems
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-pink-100 dark:bg-pink-900/20 flex items-center justify-center flex-shrink-0">
-                <Users className="w-5 h-5 text-pink-600 dark:text-pink-400" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-sm">Play with Friends</h3>
-                <p className="text-sm text-muted-foreground">
-                  Create or join rooms with unique codes
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-pink-100 dark:bg-pink-900/20 flex items-center justify-center flex-shrink-0">
-                <Trophy className="w-5 h-5 text-pink-600 dark:text-pink-400" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-sm">Track Your Journey</h3>
-                <p className="text-sm text-muted-foreground">
-                  View your history and achievements
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-4">
+          <div>
             <h3 className="text-center font-semibold mb-4">What type of traveler are you?</h3>
             <p className="text-center text-sm text-muted-foreground mb-6">
               Select your interests to personalize your BeanGo experience
