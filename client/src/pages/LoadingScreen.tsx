@@ -1,24 +1,42 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { migrateAnonymousDataToAccount } from "@/lib/dataMigration";
 import mascotImage from "@assets/coming-soon-real_1763827924724.png";
 
 export default function LoadingScreen() {
   const [, setLocation] = useLocation();
   const { isAuthenticated, isLoading } = useAuth();
+  const migrationAttempted = useRef(false);
 
   useEffect(() => {
     if (isLoading) return;
     
-    const timer = setTimeout(() => {
-      if (isAuthenticated) {
-        setLocation("/welcome");
-      } else {
-        setLocation("/interests");
+    async function handleNavigation() {
+      if (isAuthenticated && !migrationAttempted.current) {
+        migrationAttempted.current = true;
+        try {
+          await migrateAnonymousDataToAccount();
+        } catch (error) {
+          console.error("Migration failed:", error);
+        }
       }
-    }, 2000);
 
-    return () => clearTimeout(timer);
+      const timer = setTimeout(() => {
+        if (isAuthenticated) {
+          setLocation("/welcome");
+        } else {
+          setLocation("/interests");
+        }
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+
+    const cleanup = handleNavigation();
+    return () => {
+      cleanup.then(clearFn => clearFn?.());
+    };
   }, [setLocation, isAuthenticated, isLoading]);
 
   return (
