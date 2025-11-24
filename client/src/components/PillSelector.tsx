@@ -44,13 +44,13 @@ export function PillSelector({
   const isNextDisabled = requireMinSelection && selected.length === 0;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap gap-2 justify-center">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-wrap gap-1.5 md:gap-2 justify-center">
         {options.map((option) => (
           <Badge
             key={option}
             variant={selected.includes(option) ? "default" : "outline"}
-            className={`cursor-pointer px-4 py-2 text-sm transition-all ${
+            className={`cursor-pointer px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm transition-all ${
               selected.includes(option)
                 ? "bg-pink-600 text-white hover:bg-pink-700"
                 : "hover-elevate"
@@ -63,7 +63,7 @@ export function PillSelector({
         ))}
       </div>
 
-      <div className="flex flex-col gap-3 mt-8">
+      <div className="flex flex-col gap-2 md:gap-3 mt-4 md:mt-8">
         <Button
           onClick={handleNext}
           disabled={isNextDisabled}
