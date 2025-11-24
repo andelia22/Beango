@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { X, LogIn } from "lucide-react";
-import { markSignInPromptShown } from "@/lib/anonymousStorage";
 
 interface SignInPromptProps {
   message?: string;
@@ -19,18 +18,12 @@ export function SignInPrompt({
 
   const handleDismiss = () => {
     setIsVisible(false);
-    if (suppressAfterDismiss) {
-      markSignInPromptShown();
-    }
     if (onDismiss) {
       onDismiss();
     }
   };
 
   const handleSignIn = () => {
-    if (suppressAfterDismiss) {
-      markSignInPromptShown();
-    }
     window.location.href = "/api/auth/login";
   };
 

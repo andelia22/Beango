@@ -5,7 +5,7 @@ import RoomHeader from "./RoomHeader";
 import { SignInPrompt } from "./SignInPrompt";
 import { getCurrentUser, updateParticipantProgress } from "@/lib/roomStore";
 import { useAuth } from "@/hooks/useAuth";
-import { saveTaskCompletion } from "@/lib/anonymousStorage";
+import { toggleTaskCompletion } from "@/lib/anonymousStorage";
 
 interface Task {
   id: number;
@@ -56,10 +56,13 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
       [taskId]: newStatus,
     }));
 
-    if (newStatus === "completed-by-me" && !isAuthenticated && !hasShownPromptThisSession) {
-      saveTaskCompletion(roomCode, taskId.toString());
-      setShowSignInPrompt(true);
-      setHasShownPromptThisSession(true);
+    if (!isAuthenticated) {
+      toggleTaskCompletion(roomCode, taskId.toString(), newStatus === "completed-by-me");
+      
+      if (newStatus === "completed-by-me" && !hasShownPromptThisSession) {
+        setShowSignInPrompt(true);
+        setHasShownPromptThisSession(true);
+      }
     }
   };
 

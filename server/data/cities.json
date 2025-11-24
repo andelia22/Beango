@@ -36,32 +36,11 @@
       "id": "test-city",
       "name": "Test City",
       "description": "A test city for verifying BeanGo expandability",
-      "challengeCount": 24,
+      "challengeCount": 3,
       "challenges": [
         { "id": 1, "caption": "Visit landmark 1", "imageUrl": "/attached_assets/generated_images/test-city/landmark-1.jpg" },
         { "id": 2, "caption": "Visit landmark 2", "imageUrl": "/attached_assets/generated_images/test-city/landmark-2.jpg" },
-        { "id": 3, "caption": "Visit landmark 3", "imageUrl": "/attached_assets/generated_images/test-city/landmark-3.jpg" },
-        { "id": 4, "caption": "Explore area 4", "imageUrl": "/attached_assets/generated_images/test-city/landmark-1.jpg" },
-        { "id": 5, "caption": "Explore area 5", "imageUrl": "/attached_assets/generated_images/test-city/landmark-2.jpg" },
-        { "id": 6, "caption": "Explore area 6", "imageUrl": "/attached_assets/generated_images/test-city/landmark-3.jpg" },
-        { "id": 7, "caption": "Take photo at spot 7", "imageUrl": "/attached_assets/generated_images/test-city/landmark-1.jpg" },
-        { "id": 8, "caption": "Take photo at spot 8", "imageUrl": "/attached_assets/generated_images/test-city/landmark-2.jpg" },
-        { "id": 9, "caption": "Take photo at spot 9", "imageUrl": "/attached_assets/generated_images/test-city/landmark-3.jpg" },
-        { "id": 10, "caption": "Find location 10", "imageUrl": "/attached_assets/generated_images/test-city/landmark-1.jpg" },
-        { "id": 11, "caption": "Find location 11", "imageUrl": "/attached_assets/generated_images/test-city/landmark-2.jpg" },
-        { "id": 12, "caption": "Find location 12", "imageUrl": "/attached_assets/generated_images/test-city/landmark-3.jpg" },
-        { "id": 13, "caption": "Discover spot 13", "imageUrl": "/attached_assets/generated_images/test-city/landmark-1.jpg" },
-        { "id": 14, "caption": "Discover spot 14", "imageUrl": "/attached_assets/generated_images/test-city/landmark-2.jpg" },
-        { "id": 15, "caption": "Discover spot 15", "imageUrl": "/attached_assets/generated_images/test-city/landmark-3.jpg" },
-        { "id": 16, "caption": "Check out place 16", "imageUrl": "/attached_assets/generated_images/test-city/landmark-1.jpg" },
-        { "id": 17, "caption": "Check out place 17", "imageUrl": "/attached_assets/generated_images/test-city/landmark-2.jpg" },
-        { "id": 18, "caption": "Check out place 18", "imageUrl": "/attached_assets/generated_images/test-city/landmark-3.jpg" },
-        { "id": 19, "caption": "Visit attraction 19", "imageUrl": "/attached_assets/generated_images/test-city/landmark-1.jpg" },
-        { "id": 20, "caption": "Visit attraction 20", "imageUrl": "/attached_assets/generated_images/test-city/landmark-2.jpg" },
-        { "id": 21, "caption": "Visit attraction 21", "imageUrl": "/attached_assets/generated_images/test-city/landmark-3.jpg" },
-        { "id": 22, "caption": "Experience location 22", "imageUrl": "/attached_assets/generated_images/test-city/landmark-1.jpg" },
-        { "id": 23, "caption": "Experience location 23", "imageUrl": "/attached_assets/generated_images/test-city/landmark-2.jpg" },
-        { "id": 24, "caption": "Experience location 24", "imageUrl": "/attached_assets/generated_images/test-city/landmark-3.jpg" }
+        { "id": 3, "caption": "Visit landmark 3", "imageUrl": "/attached_assets/generated_images/test-city/landmark-3.jpg" }
       ]
     }
   ]
