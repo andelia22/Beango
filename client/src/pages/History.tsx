@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Users, Calendar, Home } from "lucide-react";
+import { MapPin, Users, Calendar, Home, LogIn } from "lucide-react";
 import type { BeangoCompletion } from "@shared/schema";
 
 export default function History() {
@@ -28,6 +28,48 @@ export default function History() {
     );
   }
 
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-pink-100 dark:from-gray-900 dark:to-gray-800 p-4 flex items-center justify-center">
+        <Card className="max-w-md w-full">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Sign In Required</CardTitle>
+            <CardDescription>
+              Create an account to view your BeanGo history
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="text-center py-6">
+              <LogIn className="w-16 h-16 text-pink-600 mx-auto mb-4" />
+              <p className="text-muted-foreground mb-6">
+                Sign in to see all your completed city boards and achievements
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Button
+                onClick={() => window.location.href = "/api/auth/login"}
+                className="w-full"
+                data-testid="button-signin"
+              >
+                <LogIn className="w-4 h-4 mr-2" />
+                Sign In
+              </Button>
+              <Button
+                onClick={() => setLocation("/welcome")}
+                variant="outline"
+                className="w-full"
+                data-testid="button-back-to-welcome"
+              >
+                <Home className="w-4 h-4 mr-2" />
+                Back to Welcome
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 to-pink-100 dark:from-gray-900 dark:to-gray-800 p-4">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -43,7 +85,7 @@ export default function History() {
           </CardHeader>
           <CardContent className="pt-6">
             <Button
-              onClick={() => setLocation("/")}
+              onClick={() => setLocation("/welcome")}
               variant="outline"
               className="w-full"
               data-testid="button-back-to-welcome"

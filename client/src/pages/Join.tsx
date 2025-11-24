@@ -24,7 +24,7 @@ export default function Join() {
     <RoomJoin
       onJoinRoom={handleJoinRoom}
       onCreateInstead={() => setLocation("/create")}
-      onBack={() => setLocation("/")}
+      onBack={() => setLocation("/welcome")}
     />
   );
 }

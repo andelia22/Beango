@@ -48,5 +48,5 @@ export default function Create() {
     );
   }
 
-  return <RoomCreation onCreateRoom={handleCreateRoom} onBack={() => setLocation("/")} />;
+  return <RoomCreation onCreateRoom={handleCreateRoom} onBack={() => setLocation("/welcome")} />;
 }

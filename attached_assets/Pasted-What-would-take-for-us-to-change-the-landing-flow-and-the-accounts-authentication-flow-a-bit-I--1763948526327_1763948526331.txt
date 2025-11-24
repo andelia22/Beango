@@ -1,0 +1,26 @@
+What would take for us to change the landing flow and the accounts/authentication flow a bit? 
+
+I would like to make a flow that reduces Time to Value. 
+My key value actions are creating a new beango board, having other people join (optional, as some users may choose to play solo), marking tasks as complete, submitting the beango.
+
+What I propose is that we: 
+1. Introduce a loading screen using the same png (or a similar animation inspired by it) 
+2. Once the app loads, users get a screen for capturing their interests by selecting from a set of different pills (make it in a way that the code for it is reusable in the future -- allowing us to add a screen for capturing the user's age too, in the future).
+	- the interests/categories offered are the following:  Culture & History, Nature & Outdoors, Food & Drink, Shopping & Markets, Art & Creativity, Photo & Video Challenges, Puzzles & Clues, Social & Interaction, Movement & Exploration, Sports & Play, Nightlife & Ambience, Audio / Sound-Based, Group Challenges.
+	- This screen hosts two buttons:
+		1. A Next button, which will be disabled until the user selects at least one pill.
+		2. We provide a button to Skip, but it should be a secondary element in the UX, barely noticeable. The UX should prioritize the Next button.
+
+Optional Sign-In (Soft Gate via Floating Bar)
+
+Here's the User Journey:
+1. Discovery / Entry: User arrives via App Store, shared link, QR, or social content.
+2. Instant Onboarding (No Account Required): User can immediately start without signing in.
+2A. Traveler-Type Pill Selection (Optional, Frictionless): User selects (or skips) trip characteristics to personalize future boards.
+3. Screen to Create New BeanGo Board or Join Existing BeanGo Board
+
+4. Create New BeanGo Board
+5. Complete BeanGo Board
+6. Progress Engagement & Content Loop (Only for Signed-In Users)
+
+We would offer users a pop-up to prompt them to Sign In (maybe explaining that this way they can save their progress as they complete more BeanGo boards and see their BeanGo History).

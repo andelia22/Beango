@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import TaskCard, { type TaskStatus } from "./TaskCard";
 import SubmitButton from "./SubmitButton";
 import RoomHeader from "./RoomHeader";
+import { SignInPrompt } from "./SignInPrompt";
 import { getCurrentUser, updateParticipantProgress } from "@/lib/roomStore";
+import { useAuth } from "@/hooks/useAuth";
+import { saveTaskCompletion } from "@/lib/anonymousStorage";
 
 interface Task {
   id: number;
@@ -20,6 +23,7 @@ interface TaskFeedProps {
 export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFeedProps) {
   const userId = getCurrentUser();
   const storageKey = `beango_tasks_${roomCode}_${userId}`;
+  const { isAuthenticated } = useAuth();
   
   const loadTaskStatuses = (): Record<number, TaskStatus> => {
     const stored = sessionStorage.getItem(storageKey);
@@ -31,6 +35,8 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
   
   const [taskStatuses, setTaskStatuses] = useState<Record<number, TaskStatus>>(loadTaskStatuses);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSignInPrompt, setShowSignInPrompt] = useState(false);
+  const [hasShownPromptThisSession, setHasShownPromptThisSession] = useState(false);
 
   useEffect(() => {
     sessionStorage.setItem(storageKey, JSON.stringify(taskStatuses));
@@ -43,10 +49,18 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
   }, [taskStatuses, roomCode, userId, storageKey]);
 
   const handleTaskToggle = (taskId: number) => {
+    const newStatus = taskStatuses[taskId] === "completed-by-me" ? "incomplete" : "completed-by-me";
+    
     setTaskStatuses((prev) => ({
       ...prev,
-      [taskId]: prev[taskId] === "completed-by-me" ? "incomplete" : "completed-by-me",
+      [taskId]: newStatus,
     }));
+
+    if (newStatus === "completed-by-me" && !isAuthenticated && !hasShownPromptThisSession) {
+      saveTaskCompletion(roomCode, taskId.toString());
+      setShowSignInPrompt(true);
+      setHasShownPromptThisSession(true);
+    }
   };
 
   const handleSubmit = () => {
@@ -85,6 +99,14 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
           isSubmitting={isSubmitting}
         />
       </div>
+
+      {showSignInPrompt && (
+        <SignInPrompt
+          message="Nice work! Sign in to save your progress and see all your completed BeanGos"
+          onDismiss={() => setShowSignInPrompt(false)}
+          suppressAfterDismiss={true}
+        />
+      )}
     </div>
   );
 }

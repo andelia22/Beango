@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, MapPin, Home } from "lucide-react";
+import { Trophy, MapPin, Home, LogIn } from "lucide-react";
 import type { BeangoCompletion } from "@shared/schema";
 
 export default function Profile() {
@@ -28,7 +28,47 @@ export default function Profile() {
     );
   }
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-pink-100 dark:from-gray-900 dark:to-gray-800 p-4 flex items-center justify-center">
+        <Card className="max-w-md w-full">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Sign In Required</CardTitle>
+            <CardDescription>
+              Create an account to view your profile and track your progress
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="text-center py-6">
+              <LogIn className="w-16 h-16 text-pink-600 mx-auto mb-4" />
+              <p className="text-muted-foreground mb-6">
+                Sign in to see your BeanGo stats, completed cities, and achievements
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Button
+                onClick={() => window.location.href = "/api/auth/login"}
+                className="w-full"
+                data-testid="button-signin"
+              >
+                <LogIn className="w-4 h-4 mr-2" />
+                Sign In
+              </Button>
+              <Button
+                onClick={() => setLocation("/welcome")}
+                variant="outline"
+                className="w-full"
+                data-testid="button-back-to-welcome"
+              >
+                <Home className="w-4 h-4 mr-2" />
+                Back to Welcome
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const initials = `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase() || user.email?.[0]?.toUpperCase() || "U";
 
@@ -74,7 +114,7 @@ export default function Profile() {
 
             <div className="pt-4 space-y-3">
               <Button
-                onClick={() => setLocation("/")}
+                onClick={() => setLocation("/welcome")}
                 variant="outline"
                 className="w-full"
                 data-testid="button-back-to-welcome"

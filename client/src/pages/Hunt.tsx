@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import TaskFeed from "@/components/TaskFeed";
 import { getRoom } from "@/lib/roomStore";
+import { saveBeanGoCompletion } from "@/lib/anonymousStorage";
 import type { Challenge, City } from "@shared/schema";
 
 export default function Hunt() {
@@ -85,6 +86,10 @@ export default function Hunt() {
           roomCode,
           participantCount: 1,
         });
+        toast({
+          title: "BeanGo Completed!",
+          description: "Your completion has been saved.",
+        });
       } catch (error) {
         console.error("Failed to save completion:", error);
         toast({
@@ -94,10 +99,17 @@ export default function Hunt() {
         });
       }
     } else {
+      saveBeanGoCompletion({
+        roomCode,
+        cityId: city.id,
+        cityName: city.name,
+        cityImageUrl: challenges[0]?.imageUrl || null,
+        participantCount: 1,
+        completedAt: new Date().toISOString(),
+      });
       toast({
-        title: "Not logged in",
-        description: "You must be logged in to save your progress.",
-        variant: "destructive",
+        title: "BeanGo Completed!",
+        description: "Sign in to save your progress permanently.",
       });
     }
     setLocation(`/stats/${roomCode}`);
