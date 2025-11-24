@@ -2,7 +2,7 @@ services:
   - type: web
     name: beango
     runtime: node
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --include=dev && bash scripts/build.sh
     startCommand: npm start
     envVars:
       - key: NODE_ENV
