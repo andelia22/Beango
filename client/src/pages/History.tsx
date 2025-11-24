@@ -1,12 +1,15 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Users, Calendar } from "lucide-react";
+import { MapPin, Users, Calendar, Home } from "lucide-react";
 import type { BeangoCompletion } from "@shared/schema";
 
 export default function History() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const [, setLocation] = useLocation();
 
   const { data: completions = [], isLoading: completionsLoading } = useQuery<BeangoCompletion[]>({
     queryKey: ["/api/beango-completions"],
@@ -35,9 +38,20 @@ export default function History() {
               Your BeanGo History
             </CardTitle>
             <CardDescription>
-              All your completed city scavenger hunts
+              All your completed BeanGo city boards
             </CardDescription>
           </CardHeader>
+          <CardContent className="pt-6">
+            <Button
+              onClick={() => setLocation("/welcome")}
+              variant="outline"
+              className="w-full"
+              data-testid="button-back-to-welcome"
+            >
+              <Home className="w-4 h-4 mr-2" />
+              Back to Welcome
+            </Button>
+          </CardContent>
         </Card>
 
         {completions.length === 0 ? (

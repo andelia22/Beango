@@ -1,14 +1,16 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, MapPin } from "lucide-react";
+import { Trophy, MapPin, Home } from "lucide-react";
 import type { BeangoCompletion } from "@shared/schema";
 
 export default function Profile() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const [, setLocation] = useLocation();
 
   const { data: completions = [], isLoading: completionsLoading } = useQuery<BeangoCompletion[]>({
     queryKey: ["/api/beango-completions"],
@@ -70,7 +72,16 @@ export default function Profile() {
               </div>
             </div>
 
-            <div className="pt-4">
+            <div className="pt-4 space-y-3">
+              <Button
+                onClick={() => setLocation("/welcome")}
+                variant="outline"
+                className="w-full"
+                data-testid="button-back-to-welcome"
+              >
+                <Home className="w-4 h-4 mr-2" />
+                Back to Welcome
+              </Button>
               <Button
                 onClick={() => window.location.href = "/api/logout"}
                 variant="outline"
