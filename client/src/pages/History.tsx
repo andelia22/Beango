@@ -43,7 +43,7 @@ export default function History() {
           </CardHeader>
           <CardContent className="pt-6">
             <Button
-              onClick={() => setLocation("/welcome")}
+              onClick={() => setLocation("/")}
               variant="outline"
               className="w-full"
               data-testid="button-back-to-welcome"

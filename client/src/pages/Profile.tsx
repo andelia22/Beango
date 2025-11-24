@@ -74,7 +74,7 @@ export default function Profile() {
 
             <div className="pt-4 space-y-3">
               <Button
-                onClick={() => setLocation("/welcome")}
+                onClick={() => setLocation("/")}
                 variant="outline"
                 className="w-full"
                 data-testid="button-back-to-welcome"
