@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/client",
+  "installCommand": "npm install",
+  "framework": null,
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api"
+    },
+    {
+      "source": "/attached_assets/:path*",
+      "destination": "/attached_assets/:path*"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/api"
+    }
+  ]
+}
