@@ -1,7 +1,8 @@
 import { type User, type UpsertUser, type City, type Challenge, type BeangoCompletion, type InsertBeangoCompletion, citySchema, challengeSchema } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { readFileSync } from "fs";
-import { join } from "path";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import { z } from "zod";
 
 interface CityCatalog {
@@ -17,7 +18,9 @@ const cityCatalogSchema = z.object({
 });
 
 function loadCityCatalog(): CityCatalog {
-  const catalogPath = join(import.meta.dirname, "data", "cities.json");
+  const currentDir = dirname(fileURLToPath(import.meta.url));
+  const catalogPath = join(currentDir, "data", "cities.json");
+  
   const catalogData = readFileSync(catalogPath, "utf-8");
   const rawData = JSON.parse(catalogData);
   
