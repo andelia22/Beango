@@ -1,20 +1,51 @@
-import fs from 'fs';
-import path from 'path';
+import { cpSync, mkdirSync, existsSync } from 'fs';
+import { join, resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(__filename);
+const projectRoot = resolve(__dirname, '..');
 
-const sourceDir = path.resolve(__dirname, '..', 'attached_assets');
-const destDir = path.resolve(__dirname, '..', 'dist', 'public', 'attached_assets');
+console.log('📦 Copying data files and assets to dist...');
 
-console.log('Copying assets from:', sourceDir);
-console.log('Copying assets to:', destDir);
+try {
+  const distDir = join(projectRoot, 'dist');
+  const distDataDir = join(distDir, 'data');
+  const distAssetsDir = join(distDir, 'attached_assets');
 
-if (!fs.existsSync(sourceDir)) {
-  console.error('Source directory does not exist:', sourceDir);
+  mkdirSync(distDataDir, { recursive: true });
+  console.log('✓ Created dist/data directory');
+
+  const citiesJsonSource = join(projectRoot, 'server', 'data', 'cities.json');
+  const citiesJsonDest = join(distDataDir, 'cities.json');
+  
+  if (!existsSync(citiesJsonSource)) {
+    throw new Error(`Source file not found: ${citiesJsonSource}`);
+  }
+  
+  cpSync(citiesJsonSource, citiesJsonDest);
+  console.log('✓ Copied cities.json to dist/data/');
+
+  const assetsSource = join(projectRoot, 'attached_assets');
+  
+  if (!existsSync(assetsSource)) {
+    throw new Error(`Assets directory not found: ${assetsSource}`);
+  }
+  
+  cpSync(assetsSource, distAssetsDir, { recursive: true });
+  console.log('✓ Copied attached_assets to dist/');
+
+  if (!existsSync(citiesJsonDest)) {
+    throw new Error('Verification failed: cities.json was not copied to dist/data/');
+  }
+  
+  if (!existsSync(distAssetsDir)) {
+    throw new Error('Verification failed: attached_assets was not copied to dist/');
+  }
+  
+  console.log('✅ All files copied and verified successfully!');
+  process.exit(0);
+} catch (error) {
+  console.error('❌ Error copying files:', error.message);
   process.exit(1);
 }
-
-fs.cpSync(sourceDir, destDir, { recursive: true });
-console.log('Assets copied successfully!');
