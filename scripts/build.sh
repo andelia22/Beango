@@ -7,11 +7,7 @@ vite build
 echo "Building server with esbuild..."
 esbuild server/index-prod.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js
 
-echo "Copying data files..."
-mkdir -p dist/data
-cp server/data/cities.json dist/data/
-
-echo "Copying assets..."
-cp -r attached_assets dist/
+echo "Copying data files and assets..."
+node scripts/copy-assets.js
 
 echo "Build complete!"
