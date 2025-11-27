@@ -33,6 +33,134 @@
       ]
     },
     {
+      "id": "cadiz",
+      "name": "Cádiz",
+      "description": "Culture & History · Nature & Outdoors · Food & Drink · Movement & Exploration · Nightlife & Ambience · Photo & Video Challenges",
+      "challengeCount": 24,
+      "challenges": [
+        {
+      "id": 1,
+      "caption": "Stroll along La Caleta Beach at sunset and feel like you’re walking through a movie scene.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/ok-playa-de-la-caleta.jpg"
+    },
+    {
+      "id": 2,
+      "caption": "Climb the Torre Tavira for panoramic views and a fascinating peek through the Camera Obscura.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/Camera Obscura.jpg"
+    },
+    {
+      "id": 3,
+      "caption": "Wander the winding streets of the Old Town and soak up centuries of charm.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/Old Town.jpg"
+    },
+    {
+      "id": 4,
+      "caption": "Marvel at the golden dome of Cádiz Cathedral and enjoy the breezy plaza surrounding it.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/Cadiz-cathedral Dome.jpg"
+    },
+    {
+      "id": 5,
+      "caption": "Explore the ancient Roman Theatre and imagine the performances that once filled its stands.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/Roman THeatre.jpeg"
+    },
+    {
+      "id": 6,
+      "caption": "Admire the colorful flower stalls and lively atmosphere of Plaza de las Flores as you soak in the heart of local life.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/plaza de las flores.jpg"
+    },
+    {
+      "id": 7,
+      "caption": "Step inside the Cádiz Museum to uncover Phoenician, Roman, and modern treasures.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/345548-Cadiz-Museum.jpg"
+    },
+    {
+      "id": 8,
+      "caption": "Take a relaxed walk through Parque Genovés and admire its beautifully sculpted greenery.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/Parque-Genoves-de-Cadiz.jpg"
+    },
+    {
+      "id": 9,
+      "caption": "Discover the Castillo de San Sebastián set dramatically at the end of a seawall.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/San SEbastian Castle.jpg"
+    },
+    {
+      "id": 10,
+      "caption": "Visit the Castillo de Santa Catalina for coastal views and inspiring art exhibitions.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/Santa Catalina Castle.jpg"
+    },
+    {
+      "id": 11,
+      "caption": "Dive into the Mercado Central and taste fresh seafood straight from the Atlantic.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/Mercado CEntral.jpg"
+    },
+    {
+      "id": 12,
+      "caption": "Wander along the Paseo Marítimo and enjoy ocean breezes and cheerful local energy.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/Paseo Maritimo Cadiz.jpg"
+    },
+    {
+      "id": 13,
+      "caption": "Experience Cádiz’s lively nightlife with music, cocktails, and friendly crowds.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/nifghtlife.jpg"
+    },
+    {
+      "id": 14,
+      "caption": "Join a Carnival workshop or event to feel the spirit of Spain’s most iconic festival.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/Carnival.jpg"
+    },
+    {
+      "id": 15,
+      "caption": "Take a day trip to charming nearby beaches like Playa de la Victoria.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/Playa de la Victoria.jpg"
+    },
+    {
+      "id": 16,
+      "caption": "Enjoy churros with chocolate at a traditional café for an irresistible morning treat.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/Churros-1561x1-1.jpg"
+    },
+    {
+      "id": 17,
+      "caption": "Rent a bike and explore the coastline at your own pace.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/Bike.jpg"
+    },
+    {
+      "id": 18,
+      "caption": "Listen to live flamenco and feel the emotion of authentic Andalusian culture.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/flamenco-lacava-product3_P_773_c5d10f02-c715-4067-bc85-12e5d0388826.jpg"
+    },
+    {
+      "id": 19,
+      "caption": "Sail or kayak around the bay for a refreshing look at the city from the water.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/kayak.jpg"
+    },
+    {
+      "id": 20,
+      "caption": "Visit the Oratorio de San Felipe Neri, birthplace of Spain’s first constitution.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/oratorio-san-felipe-neri_6_488x280.jpeg"
+    },
+    {
+      "id": 21,
+      "caption": "Try tortillitas de camarones, Cádiz’s crispy shrimp fritters, and savor local flavor.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/Tortillitas-des-Camarones-1.jpg"
+    },
+    {
+      "id": 22,
+      "caption": "Enjoy the relaxed, friendly vibe of Barrio La Viña, filled with character and color.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/barrio la vina.jpg"
+    },
+    {
+      "id": 23,
+      "caption": "Catch a local performance at the Gran Teatro Falla and revel in its magnificent setting.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/Gran_Teatro_Falla.jpg"
+    },
+    {
+      "id": 24,
+      "caption": "Simply sit by the sea with an ice cream and appreciate how Cádiz makes time slow down.",
+      "imageUrl": "/attached_assets/generated_images/c-diz/ice cream beach.jpg"
+    }
+  ]
+}
+    {
       "id": "test-city",
       "name": "Test City",
       "description": "A test city for verifying BeanGo expandability",
