@@ -70,7 +70,7 @@
     },
     {
       "id": 7,
-      "caption": "Step inside the Cádiz Museum to uncover Phoenician, Roman, and modern treasures.",
+      "caption": "Step inside the Cádiz Museum to uncover Phoenician, Roman, and modern treasures. Find the two Phoenician sarcophagi on the ground floor — they’re the stars of the collection.",
       "imageUrl": "/attached_assets/generated_images/c-diz/345548-Cadiz-Museum.jpg"
     },
     {
@@ -80,12 +80,12 @@
     },
     {
       "id": 9,
-      "caption": "Discover the Castillo de San Sebastián set dramatically at the end of a seawall.",
+      "caption": "Walk the entire causeway to Castillo de San Sebastián and take a picture where the waves crash against the walkway.",
       "imageUrl": "/attached_assets/generated_images/c-diz/San SEbastian Castle.jpg"
     },
     {
       "id": 10,
-      "caption": "Visit the Castillo de Santa Catalina for coastal views and inspiring art exhibitions.",
+      "caption": "Visit the Castillo de Santa Catalina for coastal views and inspiring art exhibitions. Find a photo from the 1947 explosion that shows its devastation.",
       "imageUrl": "/attached_assets/generated_images/c-diz/Santa Catalina Castle.jpg"
     },
     {
@@ -145,7 +145,7 @@
     },
     {
       "id": 22,
-      "caption": "Walk through the narrow streets of Barrio La Viña and snap a photo of its colorful facades and everyday Cadiz life.",
+      "caption": "Walk through the narrow streets of Barrio La Viña and snap a photo of its colorful facades.",
       "imageUrl": "/attached_assets/generated_images/c-diz/barrio la vina.jpg"
     },
     {
@@ -157,6 +157,134 @@
       "id": 24,
       "caption": "Simply sit by the sea with an ice cream and appreciate how Cádiz makes time slow down.",
       "imageUrl": "/attached_assets/generated_images/c-diz/ice cream beach.jpg"
+    }
+  ]
+},
+{
+  "id": "madrid",
+  "name": "Madrid",
+  "description": "Madrid blends royal landmarks, world-class art, and a buzzing food scene into a city made for wandering. From sunny plazas to late-night tapas, every neighborhood has its own rhythm. It’s vibrant, warm, and always alive — the perfect place to explore, taste, and get a little lost.",
+  "challengeCount": 24,
+  "challenges": [
+    {
+      "id": 1,
+      "caption": "El Retiro Park – Go to El Retiro Park and rent a rowboat to paddle around the lake.",
+      "imageUrl": "/attached_assets/generated_images/madrid/1. El_Retiro.jpg"
+    },
+    {
+      "id": 2,
+      "caption": "Puerta del Sol – Go around the statue of el Oso y el Madroño and touch its tail for good luck.",
+      "imageUrl": "/attached_assets/generated_images/madrid/2. Sol.jpg"
+    },
+    {
+      "id": 3,
+      "caption": "Plaza Mayor – Sit on the square eating a classic calamari sandwich (bocadillo de calamares) with alioli.",
+      "imageUrl": "/attached_assets/generated_images/madrid/3. Plaza_Mayor.jpg"
+    },
+    {
+      "id": 4,
+      "caption": "Gran Vía – See if you can spot Bumblebee (from Transformers) and get a photo with him.",
+      "imageUrl": "/attached_assets/generated_images/madrid/4. Gran_Via.jpg"
+    },
+    {
+      "id": 5,
+      "caption": "El Rastro – Find a vintage item for under 5€ (bargaining is encouraged). Make sure that you on a Sunday before it closes at 3pm.",
+      "imageUrl": "/attached_assets/generated_images/madrid/5. El_Rastro.jpg"
+    },
+    {
+      "id": 6,
+      "caption": "Royal Palace – Find the armor of King Charles V.",
+      "imageUrl": "/attached_assets/generated_images/madrid/6. Palacio_Real.jpg"
+    },
+    {
+      "id": 7,
+      "caption": "Malasaña – Go on a pub crawl and try every kind of beer.",
+      "imageUrl": "/attached_assets/generated_images/madrid/7. MalasaÃ±a.jpg"
+    },
+    {
+      "id": 8,
+      "caption": "Bernabéu Stadium – Find the pub inside the stadium and enjoy a drink (and the view).",
+      "imageUrl": "/attached_assets/generated_images/madrid/8. Bernabeu.jpg"
+    },
+    {
+      "id": 9,
+      "caption": "Plaza de España – Walk around the square and see how many mini fountains you can spot.",
+      "imageUrl": "/attached_assets/generated_images/madrid/9. Plaza_Espana.jpg"
+    },
+    {
+      "id": 10,
+      "caption": "Mercado de San Miguel – Go to this local market and try a tapa you have never tasted before.",
+      "imageUrl": "/attached_assets/generated_images/madrid/10. Mdo_San_Miguel.jpg"
+    },
+    {
+      "id": 11,
+      "caption": "Templo de Debod – Go the temple and enjoy one of the best sunset views in Madrid.",
+      "imageUrl": "/attached_assets/generated_images/madrid/11. Templo_Debod.jpg"
+    },
+    {
+      "id": 12,
+      "caption": "Almudena Cathedral – Climb to the top and see if you if you can spot the tiny angel statue hidden on the rooftop.",
+      "imageUrl": "/attached_assets/generated_images/madrid/12. Almudena.jpg"
+    },
+    {
+      "id": 13,
+      "caption": "Museo del Prado – See if you can find the “Meninas”, one of the most famous paintings inside the museum.",
+      "imageUrl": "/attached_assets/generated_images/madrid/13. Prado.jpg"
+    },
+    {
+      "id": 14,
+      "caption": "Casa de Campo – Take the cable car for an epic view of the city.",
+      "imageUrl": "/attached_assets/generated_images/madrid/14. Casa_de_Campo.jpg"
+    },
+    {
+      "id": 15,
+      "caption": "La Latina – Get a drink at one of those iconic wooden barrels that double as standing tables.",
+      "imageUrl": "/attached_assets/generated_images/madrid/15. La_Latina.jpg"
+    },
+    {
+      "id": 16,
+      "caption": "Atocha Monument — Stand under the “Forest of the Absent” and count how many trees you can see without moving your feet.",
+      "imageUrl": "/attached_assets/generated_images/madrid/16. Atocha.jpg"
+    },
+    {
+      "id": 17,
+      "caption": "Plaza de Colón – Go on a bench and enjoy a well-deserved break after a long day of walking around.",
+      "imageUrl": "/attached_assets/generated_images/madrid/17. Colon.jpg"
+    },
+    {
+      "id": 18,
+      "caption": "Lavapiés – Go to the square and try a non-Spanish dish.",
+      "imageUrl": "/attached_assets/generated_images/madrid/18. Lavapies.jpg"
+    },
+    {
+      "id": 19,
+      "caption": "Chamberí Ghost Station — Step onto the old platform and try to spot the original 1919 tile ads that are still perfectly preserved.",
+      "imageUrl": "/attached_assets/generated_images/madrid/19. Estacion_Fantasma.jpg"
+    },
+    {
+      "id": 20,
+      "caption": "Faro de Moncloa — Ride up to the observation deck and try to identify at least three Madrid landmarks from above without checking your phone.",
+      "imageUrl": "/attached_assets/generated_images/madrid/20. Faro_Moncloa.jpg"
+    },
+    {
+      "id": 21,
+      "caption": "Crystal Palace (inside el Retiro) – Capture your reflection in the glass for an artistic shot.",
+      "imageUrl": "/attached_assets/generated_images/madrid/21. Palacio_Cristal.jpg"
+    },
+    {
+      "id": 22,
+      "caption": "Ponzano – Go to this famous street and try to meet local people and enjoy a drink.",
+      "imageUrl": "/attached_assets/generated_images/madrid/22. Ponzano.jpg"
+    },
+    {
+      "id": 23,
+      "caption": "Paseo la Castellana – Take a stroll in this iconic avenue.",
+      "imageUrl": "/attached_assets/generated_images/madrid/23. Paseo_La_Castellana.jpg"
+    },
+    {
+      "id": 24,
+      "caption": "Plaza de Olavide – Go to this square and enjoy an afternoon like a real Madrileño.",
+      "imageUrl": "/attached_assets/generated_images/madrid/24. Olavide.jpg"
     }
   ]
 },
