@@ -289,6 +289,134 @@
   ]
 },
     {
+      "id": "paris",
+      "name": "Paris",
+      "description": "Culture & History • Nature & Outdoors • Food & Drink • Shopping & Markets • Art & Creativity • Photo & Video Challenges • Puzzles & Clues • Social & Interaction • Movement & Exploration • Sports & Play • Nightlife & Ambience • Audio / Sound-Based • Group Challenges",
+      "challengeCount": 24,
+"challenges": [
+    {
+      "id": 1,
+      "caption": "Eiffel Tower Visit — Walk a full circle around the base and find the plaque showing the tower’s height. Look up and notice how the structure changes shape as you move.",
+      "imageUrl": "/attached_assets/generated_images/paris/eiffel-tower.jpg"
+    },
+    {
+      "id": 2,
+      "caption": "Seine River Walk or Cruise — Pause on a bridge, watch the water for a full minute, and count how many boats pass in either direction.",
+      "imageUrl": "/attached_assets/generated_images/paris/seine-river.jpg"
+    },
+    {
+      "id": 3,
+      "caption": "Louvre Museum Visit — After seeing the Mona Lisa, choose one artwork in a quieter room and read the entire description label before moving on.",
+      "imageUrl": "/attached_assets/generated_images/paris/mona-lisa-louvre-tourists.webp"
+    },
+    {
+      "id": 4,
+      "caption": "Tuileries Garden Break — Sit in a green chair and observe five different people. Notice what each one is doing and how long they stay.",
+      "imageUrl": "/attached_assets/generated_images/paris/tulleries-gardens-paris-5-1024x768.jpg"
+    },
+    {
+      "id": 5,
+      "caption": "Notre-Dame Cathedral Exterior — Walk around the building and find a detail you might miss at first glance, such as a carving, relief, or inscription.",
+      "imageUrl": "/attached_assets/generated_images/paris/notre-dame-year-in-review.jpg"
+    },
+    {
+      "id": 6,
+      "caption": "Île Saint-Louis Stop — Buy ice cream and eat it while walking the perimeter of the island, staying close to the river the entire time.",
+      "imageUrl": "/attached_assets/generated_images/paris/ilesaint-louisstop.jpg"
+    },
+    {
+      "id": 7,
+      "caption": "Latin Quarter Walk — Step into a bookstore or stationery shop and find a book or notebook you would buy if you lived in Paris.",
+      "imageUrl": "/attached_assets/generated_images/paris/shutterstock_235993762.webp"
+    },
+    {
+      "id": 8,
+      "caption": "Panthéon Visit — Choose one person honored inside whom you didn’t know before and read why they are buried there.",
+      "imageUrl": "/attached_assets/generated_images/paris/Pantheon-Square-Paris.jpg"
+    },
+    {
+      "id": 9,
+      "caption": "Luxembourg Gardens Visit — Watch the toy sailboats and follow one with your eyes until it reaches the edge of the pool.",
+      "imageUrl": "/attached_assets/generated_images/paris/shutterstockRF_115372462.avif"
+    },
+    {
+      "id": 10,
+      "caption": "Montmartre Walk — Take a slower route uphill and notice how the streets narrow and widen as you climb.",
+      "imageUrl": "/attached_assets/generated_images/paris/montmartre-walk-paris-30.jpg"
+    },
+    {
+      "id": 11,
+      "caption": "Sacré-Cœur Viewpoint — Look out over the city and pick one area you want to explore later. Make a mental note of its direction.",
+      "imageUrl": "/attached_assets/generated_images/paris/sacre-coeur-sunset-telephoto-paris-france-477.jpg"
+    },
+    {
+      "id": 12,
+      "caption": "Place du Tertre Stop — Observe an artist from start to finish on one small detail of their process, such as shading or outlining.",
+      "imageUrl": "/attached_assets/generated_images/paris/montmartre_place_du_tertre._fortepan_69842.jpg"
+    },
+    {
+      "id": 13,
+      "caption": "Paris Métro Ride — Study the station signage and typography, then listen for how many different languages you hear spoken.",
+      "imageUrl": "/attached_assets/generated_images/paris/shutterstock_1067510216.webp"
+    },
+    {
+      "id": 14,
+      "caption": "Champs-Élysées Walk — Walk one full block without looking at any luxury brands and focus only on architecture and street activity.",
+      "imageUrl": "/attached_assets/generated_images/paris/champs-elysees-paris-france-july-people-walk-most-famous-avenue-known-luxury-shopping-starts-place-de-121919121.webp"
+    },
+    {
+      "id": 15,
+      "caption": "Arc de Triomphe Visit — Stand beneath the arch and notice how traffic flows around it. Look up at the carved names overhead.",
+      "imageUrl": "/attached_assets/generated_images/paris/europe_france_paris_arc-de-triomphe.jpg"
+    },
+    {
+      "id": 16,
+      "caption": "Musée d’Orsay Visit — Choose one artwork and trace where your eye naturally moves across the piece before reading about it.",
+      "imageUrl": "/attached_assets/generated_images/paris/20230826_113202_ca5a2912-3072x2049.jpg"
+    },
+    {
+      "id": 17,
+      "caption": "Saint-Germain Café Stop — Sit outside, finish your drink slowly, and write down one observation about Paris life that surprises you.",
+      "imageUrl": "/attached_assets/generated_images/paris/le-saint-germain-sunset.jpeg"
+    },
+    {
+      "id": 18,
+      "caption": "Le Marais Walk — Enter at least one courtyard and notice how the atmosphere changes the moment you step inside.",
+      "imageUrl": "/attached_assets/generated_images/paris/Place des Vosges Le Marais Paris.avif"
+    },
+    {
+      "id": 19,
+      "caption": "Place des Vosges Visit — Walk along all four sides of the square and notice how the arcades frame the space differently.",
+      "imageUrl": "/attached_assets/generated_images/paris/1cca49_12f888ebacfe4f0ea202664e43dcdde0~mv2.avif"
+    },
+    {
+      "id": 20,
+      "caption": "Centre Pompidou Exterior — Identify the escalator path and follow it visually from bottom to top before entering or moving on.",
+      "imageUrl": "/attached_assets/generated_images/paris/centre-pompidou-renzo-piano-richard-rogers-high-tech-architecture-_dezeen_1704_col_8.jpg"
+    },
+    {
+      "id": 21,
+      "caption": "Canal Saint-Martin Walk — Watch the water during the lock process and notice how the level changes relative to the walls.",
+      "imageUrl": "/attached_assets/generated_images/paris/generic-21.jpg"
+    },
+    {
+      "id": 22,
+      "caption": "Crêpe Stop in Montparnasse — Go to La Crêperie de Josselin and order a classic savory galette followed by a sweet crêpe. Eat them slowly and notice how different the texture is from crêpes you’ve had elsewhere.",
+      "imageUrl": "/attached_assets/generated_images/paris/0_Snr1RcsKs8ebvcp2.jpg"
+    },
+    {
+      "id": 23,
+      "caption": "Classic Parisian Meal — Go to Bouillon Chartier, order a traditional French dish (like steak-frites or boeuf bourguignon), and take a moment to notice the dining room, the pace of service, and how locals eat around you.",
+      "imageUrl": "/attached_assets/generated_images/paris/Chartier-Pariste.Net-6.webp"
+    },
+    {
+      "id": 24,
+      "caption": "Evening Seine Walk — When the Eiffel Tower sparkles, stop walking and watch the entire light sequence from beginning to end.",
+      "imageUrl": "/attached_assets/generated_images/paris/587CCDE5-CB39-4FDC-BFA8-2196E92AD865_1_201_a.jpeg"
+    }
+  ]
+    },
+    {
       "id": "test-city",
       "name": "Test City",
       "description": "A test city for verifying BeanGo expandability",
