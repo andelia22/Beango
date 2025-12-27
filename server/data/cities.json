@@ -417,6 +417,134 @@
   ]
     },
     {
+  "id": "miami",
+  "name": "Miami",
+  "description": "Miami blends tropical beaches, bold art, and nonstop energy into a city that lives outdoors. From pastel streets and oceanfront walks to Cuban flavors and late-night scenes, it’s vibrant, warm, and effortlessly fun — a place where culture, sun, and rhythm come together.",
+  "challengeCount": 24,
+  "challenges": [
+    {
+      "id": 1,
+      "caption": "South Beach – Walk along Ocean Drive and snap a picture with the iconic pastel Art Deco buildings.",
+      "imageUrl": "/attached_assets/generated_images/miami/1. South_Beach.jpg"
+    },
+    {
+      "id": 2,
+      "caption": "Little Havana – Order a Cuban coffee and enjoy it standing at a local café like the locals do.",
+      "imageUrl": "/attached_assets/generated_images/miami/2. Little_Havana.jpg"
+    },
+    {
+      "id": 3,
+      "caption": "Wynwood Walls – Find the most colorful mural and take a photo in front of it.",
+      "imageUrl": "/attached_assets/generated_images/miami/3. Wynwood.jpg"
+    },
+    {
+      "id": 4,
+      "caption": "Miami Seaquarium – Watch a dolphin show and try to guess how many dolphins are in the pool.",
+      "imageUrl": "/attached_assets/generated_images/miami/4. Seaquarium.jpg"
+    },
+    {
+      "id": 5,
+      "caption": "Vizcaya Museum and Gardens – Explore the Italian Renaissance-style gardens and try to find the hidden staircase leading to the waterfront.",
+      "imageUrl": "/attached_assets/generated_images/miami/5. Vizcaya.jpg"
+    },
+    {
+      "id": 6,
+      "caption": "Lincoln Road – Window-shop along this pedestrian-friendly street and grab an ice cream from one of the local shops.",
+      "imageUrl": "/attached_assets/generated_images/miami/6. Lincoln_Rd.jpg"
+    },
+    {
+      "id": 7,
+      "caption": "Miami Design District – Take a selfie with the colorful “Fly’s Eye Dome” sculpture.",
+      "imageUrl": "/attached_assets/generated_images/miami/7. Design_Dist.jpg"
+    },
+    {
+      "id": 8,
+      "caption": "Coconut Grove – Take a stroll along the charming streets, find a café, and enjoy a fresh mojito (or an iced coffee).",
+      "imageUrl": "/attached_assets/generated_images/miami/8. Coconut_Grove.jpg"
+    },
+    {
+      "id": 9,
+      "caption": "Coral Castle – Take a stroll along the charming streets, find a café, and enjoy a fresh mojito.",
+      "imageUrl": "/attached_assets/generated_images/miami/9. Coral_Castle.jpg"
+    },
+    {
+      "id": 10,
+      "caption": "Key Biscayne – Visit Crandon Park and collect a seashell from the beach as a souvenir.",
+      "imageUrl": "/attached_assets/generated_images/miami/10. Key_Biscayne.jpg"
+    },
+    {
+      "id": 11,
+      "caption": "Cubano Sandwich – Try a classic Cubano sandwich from any Cuban café or restaurant and rate it—does it have the perfect balance of flavors?",
+      "imageUrl": "/attached_assets/generated_images/miami/11. Cubano.jpg"
+    },
+    {
+      "id": 12,
+      "caption": "Bayside Marketplace – Take a boat ride around Biscayne Bay and spot Star Island’s celebrity homes.",
+      "imageUrl": "/attached_assets/generated_images/miami/12. Bayside_Marketplace.jpg"
+    },
+    {
+      "id": 13,
+      "caption": "Miami International Mall – Spend a few minutes finding the most unique piece of fashion and share it with a friend.",
+      "imageUrl": "/attached_assets/generated_images/miami/13. Miami_Int_Mall.jpg"
+    },
+    {
+      "id": 14,
+      "caption": "Freedom Tower – Take a moment to learn about Miami’s immigrant history at the Freedom Tower Museum.",
+      "imageUrl": "/attached_assets/generated_images/miami/14. Freedom_Tower.jpg"
+    },
+    {
+      "id": 15,
+      "caption": "Jungle Island – Find a rare animal you’ve never seen before and take a photo with it.",
+      "imageUrl": "/attached_assets/generated_images/miami/15. Jungle_Island.jpg"
+    },
+    {
+      "id": 16,
+      "caption": "Miami Beach Botanical Garden – Walk through the tropical garden and identify at least three types of plants native to Florida.",
+      "imageUrl": "/attached_assets/generated_images/miami/16. Miami_Beach_Garden.jpg"
+    },
+    {
+      "id": 17,
+      "caption": "Lummus Park – Try playing beach volleyball with new people or join a game.",
+      "imageUrl": "/attached_assets/generated_images/miami/17. Lummus_Park.jpg"
+    },
+    {
+      "id": 18,
+      "caption": "South Pointe Park – Walk to the end of the pier and look out at the Atlantic Ocean, taking in the views of Miami Beach and Fisher Island.",
+      "imageUrl": "/attached_assets/generated_images/miami/18. South_Pointe.jpg"
+    },
+    {
+      "id": 19,
+      "caption": "Sawgrass Mills Mall – Visit the mall and find the best deal on an item you’ve been wanting—bonus if you find a hidden gem in one of the outlet stores!",
+      "imageUrl": "/attached_assets/generated_images/miami/19. Sawgrass.jpg"
+    },
+    {
+      "id": 20,
+      "caption": "Miami’s Historic District – Walk around the oldest part of Miami and find the oldest building still standing.",
+      "imageUrl": "/attached_assets/generated_images/miami/20. Hist_District.jpg"
+    },
+    {
+      "id": 21,
+      "caption": "Everglades National Park – Take an airboat ride and try to spot an alligator before the guide points it out.",
+      "imageUrl": "/attached_assets/generated_images/miami/21. Everglades.jpg"
+    },
+    {
+      "id": 22,
+      "caption": "Wynwood Yard – Visit a food truck and try a dish you've never tasted before.",
+      "imageUrl": "/attached_assets/generated_images/miami/22. Wynwood_Yard.jpg"
+    },
+    {
+      "id": 23,
+      "caption": "Miami Design Preservation League – Take a walking tour to learn about the history of Miami’s Art Deco district and the architectural styles that make it unique.",
+      "imageUrl": "/attached_assets/generated_images/miami/23. Miami_Preservation_League.jpg"
+    },
+    {
+      "id": 24,
+      "caption": "The Wolfsonian-FIU Museum – Explore the fascinating collection of art, design, and propaganda from the 20th century.",
+      "imageUrl": "/attached_assets/generated_images/miami/24. FIU_Museum.jpg"
+    }
+  ]
+},
+    {
       "id": "test-city",
       "name": "Test City",
       "description": "A test city for verifying BeanGo expandability",
@@ -426,6 +554,4 @@
         { "id": 2, "caption": "Visit landmark 2", "imageUrl": "/attached_assets/generated_images/test-city/landmark-2.jpg" },
         { "id": 3, "caption": "Visit landmark 3", "imageUrl": "/attached_assets/generated_images/test-city/landmark-3.jpg" }
       ]
-    }
-  ]
 }
