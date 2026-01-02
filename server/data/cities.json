@@ -544,6 +544,38 @@
     }
   ]
 },
+{
+  "id": "rome",
+  "name": "Rome",
+  "description": "A walking-based challenge set exploring Rome through landmarks, viewpoints, rituals, and classic food experiences.",
+  "challengeCount": 24,
+  "challenges": [
+    { "id": 1, "caption": "Photograph yourself touching the outer stone wall of the Colosseum with the full structure in frame", "imageUrl": "/attached_assets/generated_images/rome/colosseum-exterior.jpg" },
+    { "id": 2, "caption": "Photograph the Roman Forum ruins from a public overlook above", "imageUrl": "/attached_assets/generated_images/rome/roman-forum-overlook.jpg" },
+    { "id": 3, "caption": "Climb Palatine Hill without stopping and photograph the view toward the Forum", "imageUrl": "/attached_assets/generated_images/rome/palatine-hill-view.jpg" },
+    { "id": 4, "caption": "Climb Capitoline Hill and photograph Piazza del Campidoglio from the top", "imageUrl": "/attached_assets/generated_images/rome/capitoline-hill-steps.jpg" },
+    { "id": 5, "caption": "Eat paccheri cacio e pepe at Da Enzo al 29 and photograph the plate before the first bite", "imageUrl": "/attached_assets/generated_images/rome/cacio-e-pepe-da-enzo.jpg" },
+    { "id": 6, "caption": "Stand beneath the Pantheon oculus and photograph straight up", "imageUrl": "/attached_assets/generated_images/rome/pantheon-oculus.jpg" },
+    { "id": 7, "caption": "Choose and eat pizza al taglio at Pizzarium Bonci and photograph the counter selection", "imageUrl": "/attached_assets/generated_images/rome/pizza-al-taglio.jpg" },
+    { "id": 8, "caption": "Photograph all three fountains in Piazza Navona during one visit", "imageUrl": "/attached_assets/generated_images/rome/piazza-navona-fountains.jpg" },
+    { "id": 9, "caption": "Eat something from Campo de’ Fiori market and photograph it nearby", "imageUrl": "/attached_assets/generated_images/rome/campo-de-fiori-food.jpg" },
+    { "id": 10, "caption": "Photograph a narrow Trastevere side street with laundry or plants visible", "imageUrl": "/attached_assets/generated_images/rome/trastevere-side-street.jpg" },
+    { "id": 11, "caption": "Photograph the apse mosaic inside Santa Maria in Trastevere", "imageUrl": "/attached_assets/generated_images/rome/santa-maria-mosaic.jpg" },
+    { "id": 12, "caption": "Walk across Ponte Garibaldi and photograph the Tiber River from the midpoint", "imageUrl": "/attached_assets/generated_images/rome/ponte-garibaldi-tiber.jpg" },
+    { "id": 13, "caption": "Eat a supplì at Supplizio and photograph the cross-section after the first bite", "imageUrl": "/attached_assets/generated_images/rome/suppli-cross-section.jpg" },
+    { "id": 14, "caption": "Photograph Castel Sant’Angelo from Ponte Sant’Angelo with statues in frame", "imageUrl": "/attached_assets/generated_images/rome/castel-sant-angelo-bridge.jpg" },
+    { "id": 15, "caption": "Photograph St. Peter’s Square with people included to show scale", "imageUrl": "/attached_assets/generated_images/rome/st-peters-square-scale.jpg" },
+    { "id": 16, "caption": "Walk through St. Peter’s Square without entering the basilica and photograph the façade", "imageUrl": "/attached_assets/generated_images/rome/st-peters-facade.jpg" },
+    { "id": 17, "caption": "Walk up the Spanish Steps without stopping and photograph the view from the top", "imageUrl": "/attached_assets/generated_images/rome/spanish-steps-top.jpg" },
+    { "id": 18, "caption": "Order a single-flavor gelato at Giolitti and photograph it before it melts", "imageUrl": "/attached_assets/generated_images/rome/gelato-single-flavor.jpg" },
+    { "id": 19, "caption": "Toss a coin into the Trevi Fountain and photograph the water surface", "imageUrl": "/attached_assets/generated_images/rome/trevi-fountain-coin.jpg" },
+    { "id": 20, "caption": "Walk the full length of Via del Corso and photograph one end marker", "imageUrl": "/attached_assets/generated_images/rome/via-del-corso.jpg" },
+    { "id": 21, "caption": "Stand still for 60 seconds in Piazza Venezia and photograph the traffic", "imageUrl": "/attached_assets/generated_images/rome/piazza-venezia-traffic.jpg" },
+    { "id": 22, "caption": "Photograph the Altare della Patria with a person for scale", "imageUrl": "/attached_assets/generated_images/rome/altare-della-patria-scale.jpg" },
+    { "id": 23, "caption": "Eat a traditional Roman dish in Testaccio and photograph the plate before finishing", "imageUrl": "/attached_assets/generated_images/rome/testaccio-traditional-dish.jpg" },
+    { "id": 24, "caption": "Photograph the Rome skyline from the Gianicolo Hill viewpoint", "imageUrl": "/attached_assets/generated_images/rome/gianicolo-viewpoint.jpg" }
+  ]
+},
     {
       "id": "test-city",
       "name": "Test City",
@@ -557,3 +589,6 @@
 }
   ]
 }
+
+
+
