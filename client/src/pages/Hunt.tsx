@@ -2,11 +2,15 @@ import { useRoute, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import TaskFeed from "@/components/TaskFeed";
-import { getRoom } from "@/lib/roomStore";
+import { getDeviceId } from "@/lib/deviceId";
 import { saveBeanGoCompletion } from "@/lib/anonymousStorage";
-import type { Challenge, City } from "@shared/schema";
+import type { Challenge, City, Room, RoomParticipant } from "@shared/schema";
+
+interface RoomWithParticipants extends Room {
+  participants: RoomParticipant[];
+}
 
 export default function Hunt() {
   const [, params] = useRoute("/hunt/:code");
@@ -14,15 +18,43 @@ export default function Hunt() {
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   const roomCode = params?.code || "DEMO-123";
+  const deviceId = getDeviceId();
 
-  const room = getRoom(roomCode);
-  const cityId = room?.cityId || "caracas";
+  const { data: roomData, isLoading: roomLoading } = useQuery<RoomWithParticipants>({
+    queryKey: ["/api/rooms", roomCode],
+    queryFn: async () => {
+      const response = await fetch(`/api/rooms/${roomCode}`);
+      if (!response.ok) {
+        throw new Error("Room not found");
+      }
+      return response.json();
+    },
+  });
+
+  const myParticipant = roomData?.participants?.find(p => p.deviceId === deviceId);
+  const cityId = roomData?.cityId || "caracas";
 
   const saveCompletionMutation = useMutation({
     mutationFn: async (data: { cityId: string; cityName: string; cityImageUrl: string | null; roomCode: string; participantCount: number }) => {
       return await apiRequest("POST", "/api/beango-completions", data);
     },
   });
+
+  const updateProgressMutation = useMutation({
+    mutationFn: async (completedChallengeIds: number[]) => {
+      return await apiRequest("PATCH", `/api/rooms/${roomCode}/progress`, {
+        deviceId,
+        completedChallengeIds,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/rooms", roomCode] });
+    },
+  });
+
+  const handleProgressUpdate = (completedIds: number[]) => {
+    updateProgressMutation.mutate(completedIds);
+  };
 
   const { data: city } = useQuery<City>({
     queryKey: ["/api/cities", cityId],
@@ -46,7 +78,7 @@ export default function Hunt() {
     enabled: !!cityId,
   });
 
-  if (isLoading || !city) {
+  if (roomLoading || isLoading || !city) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -77,6 +109,12 @@ export default function Hunt() {
   }
 
   const handleSubmit = async () => {
+    try {
+      await apiRequest("PATCH", `/api/rooms/${roomCode}/complete`, {});
+    } catch (error) {
+      console.error("Failed to mark room as complete:", error);
+    }
+    
     if (isAuthenticated) {
       try {
         await saveCompletionMutation.mutateAsync({
@@ -84,7 +122,7 @@ export default function Hunt() {
           cityName: city.name,
           cityImageUrl: challenges[0]?.imageUrl || null,
           roomCode,
-          participantCount: 1,
+          participantCount: roomData?.participants?.length || 1,
         });
         toast({
           title: "BeanGo Completed!",
@@ -104,7 +142,7 @@ export default function Hunt() {
         cityId: city.id,
         cityName: city.name,
         cityImageUrl: challenges[0]?.imageUrl || null,
-        participantCount: 1,
+        participantCount: roomData?.participants?.length || 1,
         completedAt: new Date().toISOString(),
       });
       toast({
@@ -115,12 +153,16 @@ export default function Hunt() {
     setLocation(`/stats/${roomCode}`);
   };
 
+  const initialCompletedIds = myParticipant?.completedChallengeIds || [];
+
   return (
     <TaskFeed
       cityName={city.name}
       roomCode={roomCode}
       tasks={challenges}
       onSubmit={handleSubmit}
+      onProgressUpdate={handleProgressUpdate}
+      initialCompletedIds={initialCompletedIds}
     />
   );
 }

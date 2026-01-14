@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import RoomCreation from "@/components/RoomCreation";
 import RoomCodeDisplay from "@/components/RoomCodeDisplay";
-import { addRoom } from "@/lib/roomStore";
+import { getDeviceId } from "@/lib/deviceId";
+import { apiRequest } from "@/lib/queryClient";
 import type { City } from "@shared/schema";
 
 export default function Create() {
   const [, setLocation] = useLocation();
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [cityId, setCityId] = useState<string>("");
+  const [isCreating, setIsCreating] = useState(false);
 
   const { data: cities } = useQuery<City[]>({
     queryKey: ["/api/cities"],
@@ -22,12 +24,27 @@ export default function Create() {
     return `${part1}-${part2}`;
   };
 
-  const handleCreateRoom = (selectedCityId: string) => {
+  const handleCreateRoom = async (selectedCityId: string) => {
+    setIsCreating(true);
     setCityId(selectedCityId);
     const code = generateRoomCode();
-    addRoom(code, selectedCityId);
-    setRoomCode(code);
-    console.log("Room created:", { cityId: selectedCityId, code });
+    const city = cities?.find(c => c.id === selectedCityId);
+    const deviceId = getDeviceId();
+    
+    try {
+      await apiRequest("POST", "/api/rooms", {
+        code,
+        cityId: selectedCityId,
+        cityName: city?.name || selectedCityId,
+        createdBy: deviceId,
+        totalChallenges: city?.challengeCount || 0,
+      });
+      setRoomCode(code);
+    } catch (error) {
+      console.error("Failed to create room:", error);
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const handleContinue = () => {

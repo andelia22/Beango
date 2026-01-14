@@ -1,23 +1,28 @@
 import { useLocation } from "wouter";
 import RoomJoin from "@/components/RoomJoin";
-import { joinRoom } from "@/lib/roomStore";
+import { getDeviceId } from "@/lib/deviceId";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function Join() {
   const [, setLocation] = useLocation();
 
   const handleJoinRoom = async (roomCode: string): Promise<boolean> => {
-    console.log("Attempting to join room:", roomCode);
+    const deviceId = getDeviceId();
     
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    const success = joinRoom(roomCode);
-    
-    if (success) {
-      setLocation(`/hunt/${roomCode}`);
-      return true;
+    try {
+      const response = await apiRequest("POST", `/api/rooms/${roomCode}/join`, {
+        deviceId,
+      });
+      
+      if (response.ok) {
+        setLocation(`/hunt/${roomCode}`);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Failed to join room:", error);
+      return false;
     }
-    
-    return false;
   };
 
   return (

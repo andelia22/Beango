@@ -29,14 +29,25 @@ Preferred communication style: Simple, everyday language.
 ### Data Layer
 
 **ORM**: Drizzle ORM for PostgreSQL, using `drizzle-zod` for runtime validation.
-**Schema**: Defines users, beango_completions, and sessions tables, along with JSON schemas for City and Challenge data.
+**Schema**: Defines users, beango_completions, rooms, room_participants, and sessions tables, along with JSON schemas for City and Challenge data.
 **Database**: Configured for Neon serverless PostgreSQL, with schema migrations via `drizzle-kit`.
 **Session Management**: `connect-pg-simple` for PostgreSQL-backed sessions.
 
+### Room Persistence System
+
+**Overview**: Persistent room system enabling users to leave and resume hunts without losing progress.
+**Tables**:
+- `rooms`: Stores room code, city info, status (in_progress/completed), total challenges, timestamps
+- `room_participants`: Stores device ID, user ID (optional), completed challenge IDs per room
+
+**Device ID**: Anonymous users are tracked via a stable device ID stored in localStorage (`beango_device_id`).
+**Progress Tracking**: Challenge completions are saved to database in real-time via PATCH `/api/rooms/:code/progress`.
+**Resumability**: History page shows in-progress rooms with Resume button and completion progress bar.
+
 ### Application State Management
 
-**Client-Side**: `roomStore` for room codes, local task completion tracking, TanStack Query for data caching.
-**Data Flow**: Authentication, city selection, room creation/joining, challenge fetching, local task completion, submission to database, and history/profile views.
+**Client-Side**: Device ID for anonymous tracking, TanStack Query for server state and caching.
+**Data Flow**: Authentication, city selection, room creation/joining, challenge fetching, real-time progress persistence, submission to database, and history/resume views.
 
 ### Route Structure
 

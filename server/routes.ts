@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./firebaseAuth";
-import { insertBeangoCompletionSchema } from "@shared/schema";
+import { insertBeangoCompletionSchema, insertRoomSchema, insertRoomParticipantSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   await setupAuth(app);
@@ -89,6 +89,151 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching completions:", error);
       res.status(500).json({ error: "Failed to fetch completions" });
+    }
+  });
+
+  app.post("/api/rooms", async (req, res) => {
+    try {
+      const { code, cityId, cityName, createdBy, totalChallenges } = req.body;
+      
+      const existingRoom = await storage.getRoom(code);
+      if (existingRoom) {
+        return res.status(409).json({ error: "Room code already exists" });
+      }
+      
+      const room = await storage.createRoom({
+        code,
+        cityId,
+        cityName,
+        createdBy,
+        totalChallenges,
+        status: "in_progress",
+      });
+      
+      await storage.addParticipant({
+        roomCode: code,
+        deviceId: createdBy,
+        completedChallengeIds: [],
+      });
+      
+      res.json(room);
+    } catch (error) {
+      console.error("Error creating room:", error);
+      res.status(500).json({ error: "Failed to create room" });
+    }
+  });
+
+  app.get("/api/rooms/:code", async (req, res) => {
+    try {
+      const { code } = req.params;
+      const room = await storage.getRoom(code);
+      
+      if (!room) {
+        return res.status(404).json({ error: "Room not found" });
+      }
+      
+      const participants = await storage.getParticipantsByRoom(code);
+      res.json({ ...room, participants });
+    } catch (error) {
+      console.error("Error fetching room:", error);
+      res.status(500).json({ error: "Failed to fetch room" });
+    }
+  });
+
+  app.post("/api/rooms/:code/join", async (req, res) => {
+    try {
+      const { code } = req.params;
+      const { deviceId } = req.body;
+      
+      const room = await storage.getRoom(code);
+      if (!room) {
+        return res.status(404).json({ error: "Room not found" });
+      }
+      
+      const participant = await storage.addParticipant({
+        roomCode: code,
+        deviceId,
+        completedChallengeIds: [],
+      });
+      
+      const participants = await storage.getParticipantsByRoom(code);
+      res.json({ ...room, participants, myProgress: participant });
+    } catch (error) {
+      console.error("Error joining room:", error);
+      res.status(500).json({ error: "Failed to join room" });
+    }
+  });
+
+  app.patch("/api/rooms/:code/progress", async (req, res) => {
+    try {
+      const { code } = req.params;
+      const { deviceId, completedChallengeIds } = req.body;
+      
+      const room = await storage.getRoom(code);
+      if (!room) {
+        return res.status(404).json({ error: "Room not found" });
+      }
+      
+      const participant = await storage.updateParticipantProgress(code, deviceId, completedChallengeIds);
+      if (!participant) {
+        return res.status(404).json({ error: "Participant not found" });
+      }
+      
+      res.json(participant);
+    } catch (error) {
+      console.error("Error updating progress:", error);
+      res.status(500).json({ error: "Failed to update progress" });
+    }
+  });
+
+  app.patch("/api/rooms/:code/complete", async (req, res) => {
+    try {
+      const { code } = req.params;
+      
+      const room = await storage.updateRoomStatus(code, "completed");
+      if (!room) {
+        return res.status(404).json({ error: "Room not found" });
+      }
+      
+      res.json(room);
+    } catch (error) {
+      console.error("Error completing room:", error);
+      res.status(500).json({ error: "Failed to complete room" });
+    }
+  });
+
+  app.get("/api/rooms/by-device/:deviceId", async (req, res) => {
+    try {
+      const { deviceId } = req.params;
+      const rooms = await storage.getRoomsByDeviceId(deviceId);
+      
+      const roomsWithProgress = await Promise.all(
+        rooms.map(async (room) => {
+          const participant = await storage.getParticipant(room.code, deviceId);
+          return {
+            ...room,
+            completedCount: participant?.completedChallengeIds?.length || 0,
+          };
+        })
+      );
+      
+      res.json(roomsWithProgress);
+    } catch (error) {
+      console.error("Error fetching rooms by device:", error);
+      res.status(500).json({ error: "Failed to fetch rooms" });
+    }
+  });
+
+  app.post("/api/rooms/link-user", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = (req.session as any).user.uid;
+      const { deviceId } = req.body;
+      
+      await storage.linkParticipantToUser(deviceId, userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error linking user:", error);
+      res.status(500).json({ error: "Failed to link user" });
     }
   });
 

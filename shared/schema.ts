@@ -46,6 +46,45 @@ export const insertBeangoCompletionSchema = createInsertSchema(beangoCompletions
 export type InsertBeangoCompletion = z.infer<typeof insertBeangoCompletionSchema>;
 export type BeangoCompletion = typeof beangoCompletions.$inferSelect;
 
+export const rooms = pgTable("rooms", {
+  code: varchar("code").primaryKey(),
+  cityId: varchar("city_id").notNull(),
+  cityName: varchar("city_name").notNull(),
+  createdBy: varchar("created_by").notNull(),
+  status: varchar("status").notNull().default("in_progress"),
+  totalChallenges: integer("total_challenges").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertRoomSchema = createInsertSchema(rooms).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertRoom = z.infer<typeof insertRoomSchema>;
+export type Room = typeof rooms.$inferSelect;
+
+export const roomParticipants = pgTable("room_participants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  roomCode: varchar("room_code").notNull().references(() => rooms.code),
+  deviceId: varchar("device_id").notNull(),
+  deviceName: varchar("device_name"),
+  userId: varchar("user_id").references(() => users.id),
+  completedChallengeIds: integer("completed_challenge_ids").array().notNull().default(sql`'{}'::integer[]`),
+  joinedAt: timestamp("joined_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertRoomParticipantSchema = createInsertSchema(roomParticipants).omit({
+  id: true,
+  joinedAt: true,
+  updatedAt: true,
+});
+
+export type InsertRoomParticipant = z.infer<typeof insertRoomParticipantSchema>;
+export type RoomParticipant = typeof roomParticipants.$inferSelect;
+
 export const citySchema = z.object({
   id: z.string(),
   name: z.string(),

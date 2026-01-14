@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import TaskCard, { type TaskStatus } from "./TaskCard";
 import SubmitButton from "./SubmitButton";
 import RoomHeader from "./RoomHeader";
 import { SignInPrompt } from "./SignInPrompt";
-import { getCurrentUser, updateParticipantProgress } from "@/lib/roomStore";
 import { useAuth } from "@/hooks/useAuth";
 import { toggleTaskCompletion } from "@/lib/anonymousStorage";
 
@@ -18,35 +17,39 @@ interface TaskFeedProps {
   roomCode: string;
   tasks: Task[];
   onSubmit: () => void;
+  onProgressUpdate?: (completedIds: number[]) => void;
+  initialCompletedIds?: number[];
 }
 
-export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFeedProps) {
-  const userId = getCurrentUser();
-  const storageKey = `beango_tasks_${roomCode}_${userId}`;
+export default function TaskFeed({ cityName, roomCode, tasks, onSubmit, onProgressUpdate, initialCompletedIds = [] }: TaskFeedProps) {
   const { isAuthenticated } = useAuth();
   
-  const loadTaskStatuses = (): Record<number, TaskStatus> => {
-    const stored = sessionStorage.getItem(storageKey);
-    if (stored) {
-      return JSON.parse(stored);
+  const buildInitialStatuses = (): Record<number, TaskStatus> => {
+    const statuses: Record<number, TaskStatus> = {};
+    for (const task of tasks) {
+      statuses[task.id] = initialCompletedIds.includes(task.id) ? "completed-by-me" : "incomplete";
     }
-    return tasks.reduce((acc, task) => ({ ...acc, [task.id]: "incomplete" as TaskStatus }), {});
+    return statuses;
   };
   
-  const [taskStatuses, setTaskStatuses] = useState<Record<number, TaskStatus>>(loadTaskStatuses);
+  const [taskStatuses, setTaskStatuses] = useState<Record<number, TaskStatus>>(buildInitialStatuses);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSignInPrompt, setShowSignInPrompt] = useState(false);
   const [hasShownPromptThisSession, setHasShownPromptThisSession] = useState(false);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
-    sessionStorage.setItem(storageKey, JSON.stringify(taskStatuses));
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     
-    const completedCount = Object.values(taskStatuses).filter(
-      (status) => status !== "incomplete"
-    ).length;
+    const completedIds = Object.entries(taskStatuses)
+      .filter(([_, status]) => status !== "incomplete")
+      .map(([id]) => parseInt(id, 10));
     
-    updateParticipantProgress(roomCode, userId, completedCount);
-  }, [taskStatuses, roomCode, userId, storageKey]);
+    onProgressUpdate?.(completedIds);
+  }, [taskStatuses]);
 
   const handleTaskToggle = (taskId: number) => {
     const newStatus = taskStatuses[taskId] === "completed-by-me" ? "incomplete" : "completed-by-me";
