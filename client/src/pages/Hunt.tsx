@@ -16,7 +16,7 @@ export default function Hunt() {
   const [, params] = useRoute("/hunt/:code");
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const roomCode = params?.code || "DEMO-123";
   const deviceId = getDeviceId();
 
@@ -31,7 +31,13 @@ export default function Hunt() {
     },
   });
 
-  const myParticipant = roomData?.participants?.find(p => p.deviceId === deviceId);
+  // Find participant by userId first (for cross-device sync), then fall back to deviceId
+  const myParticipant = roomData?.participants?.find(p => {
+    if (isAuthenticated && user?.id && p.userId === user.id) {
+      return true;
+    }
+    return p.deviceId === deviceId;
+  });
   const cityId = roomData?.cityId || "caracas";
 
   const saveCompletionMutation = useMutation({
@@ -49,6 +55,12 @@ export default function Hunt() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/rooms", roomCode] });
+      // Also invalidate history queries so History page shows updated progress
+      if (isAuthenticated) {
+        queryClient.invalidateQueries({ queryKey: ["/api/rooms/by-user"] });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["/api/rooms/by-device", deviceId] });
+      }
     },
   });
 
@@ -111,6 +123,12 @@ export default function Hunt() {
   const handleSubmit = async () => {
     try {
       await apiRequest("PATCH", `/api/rooms/${roomCode}/complete`, {});
+      // Invalidate history queries so the room moves to completed section
+      if (isAuthenticated) {
+        queryClient.invalidateQueries({ queryKey: ["/api/rooms/by-user"] });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["/api/rooms/by-device", deviceId] });
+      }
     } catch (error) {
       console.error("Failed to mark room as complete:", error);
     }
