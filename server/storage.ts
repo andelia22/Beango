@@ -56,8 +56,9 @@ export interface IStorage {
   
   addParticipant(participant: InsertRoomParticipant): Promise<RoomParticipant>;
   getParticipant(roomCode: string, deviceId: string): Promise<RoomParticipant | undefined>;
+  getParticipantByUserId(roomCode: string, userId: string): Promise<RoomParticipant | undefined>;
   getParticipantsByRoom(roomCode: string): Promise<RoomParticipant[]>;
-  updateParticipantProgress(roomCode: string, deviceId: string, completedChallengeIds: number[]): Promise<RoomParticipant | undefined>;
+  updateParticipantProgress(roomCode: string, deviceId: string, userId: string | null, completedChallengeIds: number[]): Promise<RoomParticipant | undefined>;
   linkParticipantToUser(deviceId: string, userId: string): Promise<void>;
 }
 
@@ -162,10 +163,13 @@ export class MemStorage implements IStorage {
   async getParticipant(_roomCode: string, _deviceId: string): Promise<RoomParticipant | undefined> {
     throw new Error("Not implemented in MemStorage");
   }
+  async getParticipantByUserId(_roomCode: string, _userId: string): Promise<RoomParticipant | undefined> {
+    throw new Error("Not implemented in MemStorage");
+  }
   async getParticipantsByRoom(_roomCode: string): Promise<RoomParticipant[]> {
     throw new Error("Not implemented in MemStorage");
   }
-  async updateParticipantProgress(_roomCode: string, _deviceId: string, _completedChallengeIds: number[]): Promise<RoomParticipant | undefined> {
+  async updateParticipantProgress(_roomCode: string, _deviceId: string, _userId: string | null, _completedChallengeIds: number[]): Promise<RoomParticipant | undefined> {
     throw new Error("Not implemented in MemStorage");
   }
   async linkParticipantToUser(_deviceId: string, _userId: string): Promise<void> {
@@ -345,8 +349,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async addParticipant(participantData: InsertRoomParticipant): Promise<RoomParticipant> {
-    const existing = await this.getParticipant(participantData.roomCode, participantData.deviceId);
-    if (existing) return existing;
+    // Check if participant exists by deviceId
+    const existingByDevice = await this.getParticipant(participantData.roomCode, participantData.deviceId);
+    if (existingByDevice) {
+      // If user is now authenticated but participant wasn't linked, link them
+      if (participantData.userId && !existingByDevice.userId) {
+        const updated = await db
+          .update(roomParticipantsTable)
+          .set({ userId: participantData.userId, updatedAt: new Date() })
+          .where(eq(roomParticipantsTable.id, existingByDevice.id))
+          .returning();
+        return updated[0];
+      }
+      return existingByDevice;
+    }
+    
+    // For authenticated users, check if they already have a participant record by userId
+    if (participantData.userId) {
+      const existingByUser = await this.getParticipantByUserId(participantData.roomCode, participantData.userId);
+      if (existingByUser) {
+        return existingByUser;
+      }
+    }
     
     const inserted = await db
       .insert(roomParticipantsTable)
@@ -363,6 +387,14 @@ export class DatabaseStorage implements IStorage {
     return result.find(p => p.deviceId === deviceId);
   }
 
+  async getParticipantByUserId(roomCode: string, userId: string): Promise<RoomParticipant | undefined> {
+    const result = await db
+      .select()
+      .from(roomParticipantsTable)
+      .where(eq(roomParticipantsTable.roomCode, roomCode));
+    return result.find(p => p.userId === userId);
+  }
+
   async getParticipantsByRoom(roomCode: string): Promise<RoomParticipant[]> {
     return await db
       .select()
@@ -370,16 +402,29 @@ export class DatabaseStorage implements IStorage {
       .where(eq(roomParticipantsTable.roomCode, roomCode));
   }
 
-  async updateParticipantProgress(roomCode: string, deviceId: string, completedChallengeIds: number[]): Promise<RoomParticipant | undefined> {
-    const participant = await this.getParticipant(roomCode, deviceId);
+  async updateParticipantProgress(roomCode: string, deviceId: string, userId: string | null, completedChallengeIds: number[]): Promise<RoomParticipant | undefined> {
+    // Try to find participant by deviceId first
+    let participant = await this.getParticipant(roomCode, deviceId);
+    
+    // If not found by deviceId but user is authenticated, try finding by userId
+    if (!participant && userId) {
+      participant = await this.getParticipantByUserId(roomCode, userId);
+    }
+    
     if (!participant) return undefined;
+    
+    // If user is authenticated and participant wasn't linked, link them now
+    const updateData: any = { 
+      completedChallengeIds, 
+      updatedAt: new Date() 
+    };
+    if (userId && !participant.userId) {
+      updateData.userId = userId;
+    }
     
     const updated = await db
       .update(roomParticipantsTable)
-      .set({ 
-        completedChallengeIds, 
-        updatedAt: new Date() 
-      })
+      .set(updateData)
       .where(eq(roomParticipantsTable.id, participant.id))
       .returning();
     

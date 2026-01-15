@@ -92,7 +92,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/rooms", async (req, res) => {
+  app.post("/api/rooms", async (req: any, res) => {
     try {
       const { code, cityId, cityName, createdBy, totalChallenges } = req.body;
       
@@ -110,9 +110,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "in_progress",
       });
       
+      const userId = (req.session as any)?.user?.uid || null;
+      
       await storage.addParticipant({
         roomCode: code,
         deviceId: createdBy,
+        userId,
         completedChallengeIds: [],
       });
       
@@ -140,7 +143,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/rooms/:code/join", async (req, res) => {
+  app.post("/api/rooms/:code/join", async (req: any, res) => {
     try {
       const { code } = req.params;
       const { deviceId } = req.body;
@@ -150,9 +153,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Room not found" });
       }
       
+      const userId = (req.session as any)?.user?.uid || null;
+      
       const participant = await storage.addParticipant({
         roomCode: code,
         deviceId,
+        userId,
         completedChallengeIds: [],
       });
       
@@ -164,17 +170,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/rooms/:code/progress", async (req, res) => {
+  app.patch("/api/rooms/:code/progress", async (req: any, res) => {
     try {
       const { code } = req.params;
       const { deviceId, completedChallengeIds } = req.body;
+      const userId = (req.session as any)?.user?.uid || null;
       
       const room = await storage.getRoom(code);
       if (!room) {
         return res.status(404).json({ error: "Room not found" });
       }
       
-      const participant = await storage.updateParticipantProgress(code, deviceId, completedChallengeIds);
+      const participant = await storage.updateParticipantProgress(code, deviceId, userId, completedChallengeIds);
       if (!participant) {
         return res.status(404).json({ error: "Participant not found" });
       }
@@ -220,6 +227,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(roomsWithProgress);
     } catch (error) {
       console.error("Error fetching rooms by device:", error);
+      res.status(500).json({ error: "Failed to fetch rooms" });
+    }
+  });
+
+  app.get("/api/rooms/by-user", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = (req.session as any).user.uid;
+      const rooms = await storage.getRoomsByUserId(userId);
+      
+      const roomsWithProgress = await Promise.all(
+        rooms.map(async (room) => {
+          const participant = await storage.getParticipantByUserId(room.code, userId);
+          return {
+            ...room,
+            completedCount: participant?.completedChallengeIds?.length || 0,
+          };
+        })
+      );
+      
+      res.json(roomsWithProgress);
+    } catch (error) {
+      console.error("Error fetching rooms by user:", error);
       res.status(500).json({ error: "Failed to fetch rooms" });
     }
   });

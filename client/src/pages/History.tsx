@@ -19,11 +19,17 @@ export default function History() {
   const { isAuthenticated } = useAuth();
 
   const { data: rooms = [], isLoading: roomsLoading } = useQuery<RoomWithProgress[]>({
-    queryKey: ["/api/rooms/by-device", deviceId],
+    queryKey: isAuthenticated ? ["/api/rooms/by-user"] : ["/api/rooms/by-device", deviceId],
     queryFn: async () => {
-      const response = await fetch(`/api/rooms/by-device/${deviceId}`);
-      if (!response.ok) return [];
-      return response.json();
+      if (isAuthenticated) {
+        const response = await fetch("/api/rooms/by-user");
+        if (!response.ok) return [];
+        return response.json();
+      } else {
+        const response = await fetch(`/api/rooms/by-device/${deviceId}`);
+        if (!response.ok) return [];
+        return response.json();
+      }
     },
   });
 
