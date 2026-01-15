@@ -44,6 +44,24 @@ Preferred communication style: Simple, everyday language.
 **Progress Tracking**: Challenge completions are saved to database in real-time via PATCH `/api/rooms/:code/progress`.
 **Resumability**: History page shows in-progress rooms with Resume button and completion progress bar.
 
+### Cross-Device Sync for Authenticated Users
+
+**Overview**: Authenticated users see the same rooms across all their devices.
+**Tracking Strategy**:
+- Anonymous users: tracked by deviceId (localStorage `beango_device_id`)
+- Authenticated users: tracked by userId from Firebase session
+
+**API Endpoints**:
+- `GET /api/rooms/by-device/:deviceId` - Returns rooms for anonymous users
+- `GET /api/rooms/by-user` - Returns rooms for authenticated users (requires auth)
+
+**Participant Linking**:
+- When a user authenticates, their participant records are linked to their userId
+- `addParticipant` checks for existing records by userId to prevent duplicates
+- `updateParticipantProgress` links participants to userId when user authenticates
+
+**Route Ordering**: Specific routes (`/api/rooms/by-user`, `/api/rooms/by-device/:deviceId`) are registered BEFORE the dynamic `/api/rooms/:code` route to prevent shadowing.
+
 ### Application State Management
 
 **Client-Side**: Device ID for anonymous tracking, TanStack Query for server state and caching.

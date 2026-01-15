@@ -126,6 +126,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // IMPORTANT: These specific routes must come BEFORE the dynamic /api/rooms/:code route
+  app.get("/api/rooms/by-device/:deviceId", async (req, res) => {
+    try {
+      const { deviceId } = req.params;
+      const rooms = await storage.getRoomsByDeviceId(deviceId);
+      
+      const roomsWithProgress = await Promise.all(
+        rooms.map(async (room) => {
+          const participant = await storage.getParticipant(room.code, deviceId);
+          return {
+            ...room,
+            completedCount: participant?.completedChallengeIds?.length || 0,
+          };
+        })
+      );
+      
+      res.json(roomsWithProgress);
+    } catch (error) {
+      console.error("Error fetching rooms by device:", error);
+      res.status(500).json({ error: "Failed to fetch rooms" });
+    }
+  });
+
+  app.get("/api/rooms/by-user", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = (req.session as any).user.uid;
+      const rooms = await storage.getRoomsByUserId(userId);
+      
+      const roomsWithProgress = await Promise.all(
+        rooms.map(async (room) => {
+          const participant = await storage.getParticipantByUserId(room.code, userId);
+          return {
+            ...room,
+            completedCount: participant?.completedChallengeIds?.length || 0,
+          };
+        })
+      );
+      
+      res.json(roomsWithProgress);
+    } catch (error) {
+      console.error("Error fetching rooms by user:", error);
+      res.status(500).json({ error: "Failed to fetch rooms" });
+    }
+  });
+
+  app.post("/api/rooms/link-user", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = (req.session as any).user.uid;
+      const { deviceId } = req.body;
+      
+      await storage.linkParticipantToUser(deviceId, userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error linking user:", error);
+      res.status(500).json({ error: "Failed to link user" });
+    }
+  });
+
   app.get("/api/rooms/:code", async (req, res) => {
     try {
       const { code } = req.params;
@@ -206,63 +264,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error completing room:", error);
       res.status(500).json({ error: "Failed to complete room" });
-    }
-  });
-
-  app.get("/api/rooms/by-device/:deviceId", async (req, res) => {
-    try {
-      const { deviceId } = req.params;
-      const rooms = await storage.getRoomsByDeviceId(deviceId);
-      
-      const roomsWithProgress = await Promise.all(
-        rooms.map(async (room) => {
-          const participant = await storage.getParticipant(room.code, deviceId);
-          return {
-            ...room,
-            completedCount: participant?.completedChallengeIds?.length || 0,
-          };
-        })
-      );
-      
-      res.json(roomsWithProgress);
-    } catch (error) {
-      console.error("Error fetching rooms by device:", error);
-      res.status(500).json({ error: "Failed to fetch rooms" });
-    }
-  });
-
-  app.get("/api/rooms/by-user", isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = (req.session as any).user.uid;
-      const rooms = await storage.getRoomsByUserId(userId);
-      
-      const roomsWithProgress = await Promise.all(
-        rooms.map(async (room) => {
-          const participant = await storage.getParticipantByUserId(room.code, userId);
-          return {
-            ...room,
-            completedCount: participant?.completedChallengeIds?.length || 0,
-          };
-        })
-      );
-      
-      res.json(roomsWithProgress);
-    } catch (error) {
-      console.error("Error fetching rooms by user:", error);
-      res.status(500).json({ error: "Failed to fetch rooms" });
-    }
-  });
-
-  app.post("/api/rooms/link-user", isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = (req.session as any).user.uid;
-      const { deviceId } = req.body;
-      
-      await storage.linkParticipantToUser(deviceId, userId);
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Error linking user:", error);
-      res.status(500).json({ error: "Failed to link user" });
     }
   });
 
