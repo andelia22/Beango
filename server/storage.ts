@@ -1,4 +1,4 @@
-import { type User, type UpsertUser, type City, type Challenge, type BeangoCompletion, type InsertBeangoCompletion, type Room, type InsertRoom, type RoomParticipant, type InsertRoomParticipant, citySchema, challengeSchema } from "@shared/schema";
+import { type User, type UpsertUser, type City, type Challenge, type BeangoCompletion, type InsertBeangoCompletion, type Room, type InsertRoom, type RoomParticipant, type InsertRoomParticipant, type ChallengeCompletion, type InsertChallengeCompletion, citySchema, challengeSchema } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { readFileSync, existsSync } from "fs";
 import { join, dirname } from "path";
@@ -62,6 +62,10 @@ export interface IStorage {
   getParticipantsByRoom(roomCode: string): Promise<RoomParticipant[]>;
   updateParticipantProgress(roomCode: string, deviceId: string, userId: string | null, completedChallengeIds: number[]): Promise<RoomParticipant | undefined>;
   linkParticipantToUser(deviceId: string, userId: string): Promise<void>;
+  
+  addChallengeCompletion(completion: InsertChallengeCompletion): Promise<ChallengeCompletion>;
+  removeChallengeCompletion(roomCode: string, challengeId: number, deviceId: string): Promise<void>;
+  getChallengeCompletionsByRoom(roomCode: string): Promise<ChallengeCompletion[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -183,11 +187,20 @@ export class MemStorage implements IStorage {
   async linkParticipantToUser(_deviceId: string, _userId: string): Promise<void> {
     throw new Error("Not implemented in MemStorage");
   }
+  async addChallengeCompletion(_completion: InsertChallengeCompletion): Promise<ChallengeCompletion> {
+    throw new Error("Not implemented in MemStorage");
+  }
+  async removeChallengeCompletion(_roomCode: string, _challengeId: number, _deviceId: string): Promise<void> {
+    throw new Error("Not implemented in MemStorage");
+  }
+  async getChallengeCompletionsByRoom(_roomCode: string): Promise<ChallengeCompletion[]> {
+    throw new Error("Not implemented in MemStorage");
+  }
 }
 
 import { db } from "./db";
-import { users as usersTable, beangoCompletions as beangoCompletionsTable, rooms as roomsTable, roomParticipants as roomParticipantsTable } from "@shared/schema";
-import { eq, desc, or } from "drizzle-orm";
+import { users as usersTable, beangoCompletions as beangoCompletionsTable, rooms as roomsTable, roomParticipants as roomParticipantsTable, challengeCompletions as challengeCompletionsTable } from "@shared/schema";
+import { eq, desc, or, and } from "drizzle-orm";
 
 export class DatabaseStorage implements IStorage {
   private cityCatalog: CityCatalog;
@@ -483,6 +496,50 @@ export class DatabaseStorage implements IStorage {
       .update(roomParticipantsTable)
       .set({ userId, updatedAt: new Date() })
       .where(eq(roomParticipantsTable.deviceId, deviceId));
+  }
+
+  async addChallengeCompletion(completion: InsertChallengeCompletion): Promise<ChallengeCompletion> {
+    // Check if completion already exists for this user/challenge
+    const existing = await db
+      .select()
+      .from(challengeCompletionsTable)
+      .where(
+        and(
+          eq(challengeCompletionsTable.roomCode, completion.roomCode),
+          eq(challengeCompletionsTable.challengeId, completion.challengeId),
+          eq(challengeCompletionsTable.completedByDeviceId, completion.completedByDeviceId)
+        )
+      );
+    
+    if (existing.length > 0) {
+      return existing[0];
+    }
+    
+    const result = await db
+      .insert(challengeCompletionsTable)
+      .values(completion)
+      .returning();
+    return result[0];
+  }
+
+  async removeChallengeCompletion(roomCode: string, challengeId: number, deviceId: string): Promise<void> {
+    await db
+      .delete(challengeCompletionsTable)
+      .where(
+        and(
+          eq(challengeCompletionsTable.roomCode, roomCode),
+          eq(challengeCompletionsTable.challengeId, challengeId),
+          eq(challengeCompletionsTable.completedByDeviceId, deviceId)
+        )
+      );
+  }
+
+  async getChallengeCompletionsByRoom(roomCode: string): Promise<ChallengeCompletion[]> {
+    return await db
+      .select()
+      .from(challengeCompletionsTable)
+      .where(eq(challengeCompletionsTable.roomCode, roomCode))
+      .orderBy(challengeCompletionsTable.completedAt);
   }
 }
 

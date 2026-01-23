@@ -89,6 +89,24 @@ export const insertRoomParticipantSchema = createInsertSchema(roomParticipants).
 export type InsertRoomParticipant = z.infer<typeof insertRoomParticipantSchema>;
 export type RoomParticipant = typeof roomParticipants.$inferSelect;
 
+export const challengeCompletions = pgTable("challenge_completions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  roomCode: varchar("room_code").notNull().references(() => rooms.code),
+  challengeId: integer("challenge_id").notNull(),
+  completedByDeviceId: varchar("completed_by_device_id").notNull(),
+  completedByUserId: varchar("completed_by_user_id").references(() => users.id),
+  completedByName: varchar("completed_by_name"),
+  completedAt: timestamp("completed_at").defaultNow(),
+});
+
+export const insertChallengeCompletionSchema = createInsertSchema(challengeCompletions).omit({
+  id: true,
+  completedAt: true,
+});
+
+export type InsertChallengeCompletion = z.infer<typeof insertChallengeCompletionSchema>;
+export type ChallengeCompletion = typeof challengeCompletions.$inferSelect;
+
 export const citySchema = z.object({
   id: z.string(),
   name: z.string(),
