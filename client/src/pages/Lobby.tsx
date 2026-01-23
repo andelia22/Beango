@@ -36,9 +36,10 @@ export default function Lobby() {
   const [copied, setCopied] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
 
-  const { data: room, isLoading, refetch } = useQuery<RoomData>({
+  const { data: room, isLoading } = useQuery<RoomData>({
     queryKey: ["/api/rooms", roomCode],
     refetchInterval: 2000,
+    staleTime: 0, // Ensure fresh data on each poll
     enabled: !!roomCode,
   });
 
