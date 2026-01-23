@@ -13,6 +13,7 @@ import Welcome from "@/pages/Welcome";
 import Create from "@/pages/Create";
 import Join from "@/pages/Join";
 import Hunt from "@/pages/Hunt";
+import Lobby from "@/pages/Lobby";
 import Stats from "@/pages/Stats";
 import Profile from "@/pages/Profile";
 import History from "@/pages/History";
@@ -25,6 +26,7 @@ function Router() {
       <Route path="/welcome" component={Welcome} />
       <Route path="/create" component={Create} />
       <Route path="/join" component={Join} />
+      <Route path="/lobby/:code" component={Lobby} />
       <Route path="/hunt/:code" component={Hunt} />
       <Route path="/stats/:code" component={Stats} />
       <Route path="/profile" component={Profile} />

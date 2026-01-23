@@ -40,8 +40,16 @@ export default function History() {
 
   const isLoading = roomsLoading || (isAuthenticated && completionsLoading);
 
-  const inProgressRooms = rooms.filter(r => r.status === "in_progress");
+  const inProgressRooms = rooms.filter(r => r.status === "in_progress" || r.status === "waiting");
   const completedRooms = rooms.filter(r => r.status === "completed");
+  
+  const handleResumeRoom = (room: RoomWithProgress) => {
+    if (room.status === "waiting") {
+      setLocation(`/lobby/${room.code}`);
+    } else {
+      setLocation(`/hunt/${room.code}`);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -133,11 +141,11 @@ export default function History() {
                             </div>
                           </div>
                           <Button
-                            onClick={() => setLocation(`/hunt/${room.code}`)}
+                            onClick={() => handleResumeRoom(room)}
                             data-testid={`button-resume-${room.code}`}
                           >
                             <Play className="w-4 h-4 mr-2" />
-                            Resume
+                            {room.status === "waiting" ? "Join Lobby" : "Resume"}
                           </Button>
                         </div>
                         <div className="mt-3">

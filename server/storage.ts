@@ -51,8 +51,10 @@ export interface IStorage {
   createRoom(room: InsertRoom): Promise<Room>;
   getRoom(code: string): Promise<Room | undefined>;
   updateRoomStatus(code: string, status: string): Promise<Room | undefined>;
+  startHunt(code: string, selectedChallengeIds: number[]): Promise<Room | undefined>;
   getRoomsByDeviceId(deviceId: string): Promise<Room[]>;
   getRoomsByUserId(userId: string): Promise<Room[]>;
+  getParticipantInterests(roomCode: string): Promise<string[][]>;
   
   addParticipant(participant: InsertRoomParticipant): Promise<RoomParticipant>;
   getParticipant(roomCode: string, deviceId: string): Promise<RoomParticipant | undefined>;
@@ -151,10 +153,16 @@ export class MemStorage implements IStorage {
   async updateRoomStatus(_code: string, _status: string): Promise<Room | undefined> {
     throw new Error("Not implemented in MemStorage");
   }
+  async startHunt(_code: string, _selectedChallengeIds: number[]): Promise<Room | undefined> {
+    throw new Error("Not implemented in MemStorage");
+  }
   async getRoomsByDeviceId(_deviceId: string): Promise<Room[]> {
     throw new Error("Not implemented in MemStorage");
   }
   async getRoomsByUserId(_userId: string): Promise<Room[]> {
+    throw new Error("Not implemented in MemStorage");
+  }
+  async getParticipantInterests(_roomCode: string): Promise<string[][]> {
     throw new Error("Not implemented in MemStorage");
   }
   async addParticipant(_participant: InsertRoomParticipant): Promise<RoomParticipant> {
@@ -312,6 +320,40 @@ export class DatabaseStorage implements IStorage {
       .where(eq(roomsTable.code, code))
       .returning();
     return updated[0];
+  }
+
+  async startHunt(code: string, selectedChallengeIds: number[]): Promise<Room | undefined> {
+    const updated = await db
+      .update(roomsTable)
+      .set({ 
+        status: "in_progress", 
+        selectedChallengeIds,
+        totalChallenges: 24,
+        updatedAt: new Date() 
+      })
+      .where(eq(roomsTable.code, code))
+      .returning();
+    return updated[0];
+  }
+
+  async getParticipantInterests(roomCode: string): Promise<string[][]> {
+    const participants = await db
+      .select()
+      .from(roomParticipantsTable)
+      .where(eq(roomParticipantsTable.roomCode, roomCode));
+    
+    const interestsArrays: string[][] = [];
+    
+    for (const participant of participants) {
+      if (participant.userId) {
+        const user = await this.getUser(participant.userId);
+        if (user?.interests && user.interests.length > 0) {
+          interestsArrays.push(user.interests);
+        }
+      }
+    }
+    
+    return interestsArrays;
   }
 
   async getRoomsByDeviceId(deviceId: string): Promise<Room[]> {

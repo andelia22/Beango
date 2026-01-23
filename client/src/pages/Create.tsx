@@ -49,7 +49,7 @@ export default function Create() {
 
   const handleContinue = () => {
     if (roomCode) {
-      setLocation(`/hunt/${roomCode}`);
+      setLocation(`/lobby/${roomCode}`);
     }
   };
 

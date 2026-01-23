@@ -10,6 +10,7 @@ import type { Challenge, City, Room, RoomParticipant } from "@shared/schema";
 
 interface RoomWithParticipants extends Room {
   participants: RoomParticipant[];
+  selectedChallengeIds: number[] | null;
 }
 
 export default function Hunt() {
@@ -30,6 +31,12 @@ export default function Hunt() {
       return response.json();
     },
   });
+
+  // Redirect to lobby if hunt hasn't started yet
+  if (roomData?.status === "waiting") {
+    setLocation(`/lobby/${roomCode}`);
+    return null;
+  }
 
   // Find participant by userId first (for cross-device sync), then fall back to deviceId
   const myParticipant = roomData?.participants?.find(p => {
@@ -78,14 +85,25 @@ export default function Hunt() {
     enabled: !!cityId,
   });
 
+  const selectedChallengeIds = roomData?.selectedChallengeIds;
+  
   const { data: challenges = [], isLoading, error } = useQuery<Challenge[]>({
-    queryKey: ["/api/cities", cityId, "challenges"],
+    queryKey: ["/api/cities", cityId, "challenges", selectedChallengeIds],
     queryFn: async () => {
       const response = await fetch(`/api/cities/${cityId}/challenges`);
       if (!response.ok) {
         throw new Error(`Failed to load challenges for city '${cityId}'`);
       }
-      return response.json();
+      const allChallenges: Challenge[] = await response.json();
+      
+      // If room has selected challenges, filter to only show those
+      if (selectedChallengeIds && selectedChallengeIds.length > 0) {
+        const selectedSet = new Set(selectedChallengeIds);
+        return allChallenges.filter(c => selectedSet.has(c.id));
+      }
+      
+      // Fallback for rooms created before this feature
+      return allChallenges.slice(0, 24);
     },
     enabled: !!cityId,
   });

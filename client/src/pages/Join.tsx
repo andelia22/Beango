@@ -15,7 +15,7 @@ export default function Join() {
       });
       
       if (response.ok) {
-        setLocation(`/hunt/${roomCode}`);
+        setLocation(`/lobby/${roomCode}`);
         return true;
       }
       return false;

@@ -2,7 +2,76 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./firebaseAuth";
-import { insertBeangoCompletionSchema, insertRoomSchema, insertRoomParticipantSchema } from "@shared/schema";
+import { insertBeangoCompletionSchema, insertRoomSchema, insertRoomParticipantSchema, type Challenge } from "@shared/schema";
+
+function selectChallengesForGroup(
+  allChallenges: Challenge[], 
+  participantInterests: string[][], 
+  targetCount: number
+): number[] {
+  if (allChallenges.length <= targetCount) {
+    return allChallenges.map(c => c.id);
+  }
+  
+  if (participantInterests.length === 0 || participantInterests.every(i => i.length === 0)) {
+    const shuffled = [...allChallenges].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, targetCount).map(c => c.id);
+  }
+  
+  const interestWeights: Map<string, number> = new Map();
+  const allInterestsSet: Set<string> = new Set();
+  
+  for (const interests of participantInterests) {
+    for (const interest of interests) {
+      allInterestsSet.add(interest);
+      interestWeights.set(interest, (interestWeights.get(interest) || 0) + 1);
+    }
+  }
+  
+  const challengeScores: Map<number, number> = new Map();
+  for (const challenge of allChallenges) {
+    let score = 0;
+    const challengeInterests = challenge.interests || [];
+    for (const interest of challengeInterests) {
+      score += interestWeights.get(interest) || 0;
+    }
+    challengeScores.set(challenge.id, score);
+  }
+  
+  const selected: Set<number> = new Set();
+  const interestCovered: Set<string> = new Set();
+  
+  for (const interest of Array.from(allInterestsSet)) {
+    if (selected.size >= targetCount) break;
+    
+    const matchingChallenges = allChallenges.filter(c => 
+      !selected.has(c.id) && 
+      (c.interests || []).includes(interest)
+    );
+    
+    if (matchingChallenges.length > 0) {
+      const randomPick = matchingChallenges[Math.floor(Math.random() * matchingChallenges.length)];
+      selected.add(randomPick.id);
+      interestCovered.add(interest);
+    }
+  }
+  
+  const remaining = allChallenges
+    .filter(c => !selected.has(c.id))
+    .sort((a, b) => {
+      const scoreA = challengeScores.get(a.id) || 0;
+      const scoreB = challengeScores.get(b.id) || 0;
+      if (scoreB !== scoreA) return scoreB - scoreA;
+      return Math.random() - 0.5;
+    });
+  
+  for (const challenge of remaining) {
+    if (selected.size >= targetCount) break;
+    selected.add(challenge.id);
+  }
+  
+  return Array.from(selected);
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   await setupAuth(app);
@@ -101,16 +170,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(409).json({ error: "Room code already exists" });
       }
       
+      const userId = (req.session as any)?.user?.uid || null;
+      let hostFirstName: string | null = null;
+      
+      if (userId) {
+        const user = await storage.getUser(userId);
+        hostFirstName = user?.firstName || null;
+      }
+      
       const room = await storage.createRoom({
         code,
         cityId,
         cityName,
         createdBy,
+        hostDeviceId: createdBy,
+        hostUserId: userId,
+        hostFirstName,
         totalChallenges,
-        status: "in_progress",
+        status: "waiting",
       });
-      
-      const userId = (req.session as any)?.user?.uid || null;
       
       await storage.addParticipant({
         roomCode: code,
@@ -264,6 +342,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error completing room:", error);
       res.status(500).json({ error: "Failed to complete room" });
+    }
+  });
+
+  app.post("/api/rooms/:code/start-hunt", async (req: any, res) => {
+    try {
+      const { code } = req.params;
+      const { deviceId } = req.body;
+      
+      const room = await storage.getRoom(code);
+      if (!room) {
+        return res.status(404).json({ error: "Room not found" });
+      }
+      
+      if (room.status !== "waiting") {
+        return res.status(400).json({ error: "Hunt already started" });
+      }
+      
+      if (room.hostDeviceId !== deviceId) {
+        return res.status(403).json({ error: "Only the host can start the hunt" });
+      }
+      
+      const participantInterests = await storage.getParticipantInterests(code);
+      
+      const city = await storage.getCity(room.cityId);
+      if (!city) {
+        return res.status(404).json({ error: "City not found" });
+      }
+      
+      const allChallenges = await storage.getCityChallenges(room.cityId);
+      
+      const selectedChallengeIds = selectChallengesForGroup(allChallenges, participantInterests, 24);
+      
+      const updatedRoom = await storage.startHunt(code, selectedChallengeIds);
+      
+      res.json(updatedRoom);
+    } catch (error) {
+      console.error("Error starting hunt:", error);
+      res.status(500).json({ error: "Failed to start hunt" });
     }
   });
 
