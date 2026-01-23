@@ -51,7 +51,11 @@ export const rooms = pgTable("rooms", {
   cityId: varchar("city_id").notNull(),
   cityName: varchar("city_name").notNull(),
   createdBy: varchar("created_by").notNull(),
-  status: varchar("status").notNull().default("in_progress"),
+  hostDeviceId: varchar("host_device_id"),
+  hostUserId: varchar("host_user_id").references(() => users.id),
+  hostFirstName: varchar("host_first_name"),
+  status: varchar("status").notNull().default("waiting"),
+  selectedChallengeIds: integer("selected_challenge_ids").array(),
   totalChallenges: integer("total_challenges").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -97,6 +101,7 @@ export const challengeSchema = z.object({
   id: z.number(),
   caption: z.string(),
   imageUrl: z.string(),
+  interests: z.array(z.string()).optional(),
 });
 
 export type City = z.infer<typeof citySchema>;
