@@ -430,8 +430,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { code, challengeId } = req.params;
       const { deviceId } = req.body;
+      const userId = (req.session as any)?.user?.uid || null;
       
-      await storage.removeChallengeCompletion(code, parseInt(challengeId), deviceId);
+      await storage.removeChallengeCompletion(code, parseInt(challengeId), deviceId, userId);
       
       res.json({ success: true });
     } catch (error) {

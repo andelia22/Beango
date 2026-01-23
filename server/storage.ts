@@ -64,7 +64,7 @@ export interface IStorage {
   linkParticipantToUser(deviceId: string, userId: string): Promise<void>;
   
   addChallengeCompletion(completion: InsertChallengeCompletion): Promise<ChallengeCompletion>;
-  removeChallengeCompletion(roomCode: string, challengeId: number, deviceId: string): Promise<void>;
+  removeChallengeCompletion(roomCode: string, challengeId: number, deviceId: string, userId?: string | null): Promise<void>;
   getChallengeCompletionsByRoom(roomCode: string): Promise<ChallengeCompletion[]>;
 }
 
@@ -190,7 +190,7 @@ export class MemStorage implements IStorage {
   async addChallengeCompletion(_completion: InsertChallengeCompletion): Promise<ChallengeCompletion> {
     throw new Error("Not implemented in MemStorage");
   }
-  async removeChallengeCompletion(_roomCode: string, _challengeId: number, _deviceId: string): Promise<void> {
+  async removeChallengeCompletion(_roomCode: string, _challengeId: number, _deviceId: string, _userId?: string | null): Promise<void> {
     throw new Error("Not implemented in MemStorage");
   }
   async getChallengeCompletionsByRoom(_roomCode: string): Promise<ChallengeCompletion[]> {
@@ -522,16 +522,32 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
-  async removeChallengeCompletion(roomCode: string, challengeId: number, deviceId: string): Promise<void> {
-    await db
-      .delete(challengeCompletionsTable)
-      .where(
-        and(
-          eq(challengeCompletionsTable.roomCode, roomCode),
-          eq(challengeCompletionsTable.challengeId, challengeId),
-          eq(challengeCompletionsTable.completedByDeviceId, deviceId)
-        )
-      );
+  async removeChallengeCompletion(roomCode: string, challengeId: number, deviceId: string, userId: string | null = null): Promise<void> {
+    // For authenticated users, also try to match by userId (for cross-device sync)
+    if (userId) {
+      await db
+        .delete(challengeCompletionsTable)
+        .where(
+          and(
+            eq(challengeCompletionsTable.roomCode, roomCode),
+            eq(challengeCompletionsTable.challengeId, challengeId),
+            or(
+              eq(challengeCompletionsTable.completedByDeviceId, deviceId),
+              eq(challengeCompletionsTable.completedByUserId, userId)
+            )
+          )
+        );
+    } else {
+      await db
+        .delete(challengeCompletionsTable)
+        .where(
+          and(
+            eq(challengeCompletionsTable.roomCode, roomCode),
+            eq(challengeCompletionsTable.challengeId, challengeId),
+            eq(challengeCompletionsTable.completedByDeviceId, deviceId)
+          )
+        );
+    }
   }
 
   async getChallengeCompletionsByRoom(roomCode: string): Promise<ChallengeCompletion[]> {

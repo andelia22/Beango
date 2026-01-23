@@ -82,7 +82,8 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
       .filter(c => c.challengeId === taskId)
       .map(c => ({
         name: c.completedByName,
-        isMe: c.completedByDeviceId === deviceId,
+        // Check userId first (for cross-device sync), then fall back to deviceId
+        isMe: (isAuthenticated && user?.id && c.completedByUserId === user.id) || c.completedByDeviceId === deviceId,
       }));
   };
 
