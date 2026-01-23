@@ -97,7 +97,8 @@ export default function Lobby() {
     );
   }
 
-  const isHost = room.hostDeviceId === deviceId;
+  // Check if current user is the host - check userId first (for cross-device sync), then deviceId
+  const isHost = (user?.id && room.hostUserId === user.id) || room.hostDeviceId === deviceId;
   const hostDisplayName = room.hostFirstName || "room creator";
   const participantCount = room.participants?.length || 1;
 

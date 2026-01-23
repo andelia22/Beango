@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useRoute, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -33,10 +34,11 @@ export default function Hunt() {
   });
 
   // Redirect to lobby if hunt hasn't started yet
-  if (roomData?.status === "waiting") {
-    setLocation(`/lobby/${roomCode}`);
-    return null;
-  }
+  useEffect(() => {
+    if (!roomLoading && roomData?.status === "waiting") {
+      setLocation(`/lobby/${roomCode}`);
+    }
+  }, [roomLoading, roomData?.status, roomCode, setLocation]);
 
   // Find participant by userId first (for cross-device sync), then fall back to deviceId
   const myParticipant = roomData?.participants?.find(p => {

@@ -349,6 +349,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { code } = req.params;
       const { deviceId } = req.body;
+      const userId = (req.session as any)?.user?.uid || null;
       
       const room = await storage.getRoom(code);
       if (!room) {
@@ -359,7 +360,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Hunt already started" });
       }
       
-      if (room.hostDeviceId !== deviceId) {
+      // Check if user is the host - check userId first (for cross-device sync), then deviceId
+      const isHost = (userId && room.hostUserId === userId) || room.hostDeviceId === deviceId;
+      if (!isHost) {
         return res.status(403).json({ error: "Only the host can start the hunt" });
       }
       
