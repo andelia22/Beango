@@ -386,6 +386,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all challenge completions for a room (for real-time sync)
+  app.get("/api/rooms/:code/completions", async (req, res) => {
+    try {
+      const { code } = req.params;
+      const completions = await storage.getChallengeCompletionsByRoom(code);
+      res.json(completions);
+    } catch (error) {
+      console.error("Error fetching completions:", error);
+      res.status(500).json({ error: "Failed to fetch completions" });
+    }
+  });
+
+  // Add a challenge completion
+  app.post("/api/rooms/:code/challenges/:challengeId/complete", async (req: any, res) => {
+    try {
+      const { code, challengeId } = req.params;
+      const { deviceId, userName } = req.body;
+      const userId = (req.session as any)?.user?.uid || null;
+      
+      const room = await storage.getRoom(code);
+      if (!room) {
+        return res.status(404).json({ error: "Room not found" });
+      }
+      
+      const completion = await storage.addChallengeCompletion({
+        roomCode: code,
+        challengeId: parseInt(challengeId),
+        completedByDeviceId: deviceId,
+        completedByUserId: userId,
+        completedByName: userName || null,
+      });
+      
+      res.json(completion);
+    } catch (error) {
+      console.error("Error adding completion:", error);
+      res.status(500).json({ error: "Failed to add completion" });
+    }
+  });
+
+  // Remove a challenge completion
+  app.delete("/api/rooms/:code/challenges/:challengeId/complete", async (req: any, res) => {
+    try {
+      const { code, challengeId } = req.params;
+      const { deviceId } = req.body;
+      
+      await storage.removeChallengeCompletion(code, parseInt(challengeId), deviceId);
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error removing completion:", error);
+      res.status(500).json({ error: "Failed to remove completion" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

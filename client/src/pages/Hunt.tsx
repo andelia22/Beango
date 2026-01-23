@@ -55,28 +55,6 @@ export default function Hunt() {
     },
   });
 
-  const updateProgressMutation = useMutation({
-    mutationFn: async (completedChallengeIds: number[]) => {
-      return await apiRequest("PATCH", `/api/rooms/${roomCode}/progress`, {
-        deviceId,
-        completedChallengeIds,
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/rooms", roomCode] });
-      // Also invalidate history queries so History page shows updated progress
-      if (isAuthenticated) {
-        queryClient.invalidateQueries({ queryKey: ["/api/rooms/by-user"] });
-      } else {
-        queryClient.invalidateQueries({ queryKey: ["/api/rooms/by-device", deviceId] });
-      }
-    },
-  });
-
-  const handleProgressUpdate = (completedIds: number[]) => {
-    updateProgressMutation.mutate(completedIds);
-  };
-
   const { data: city } = useQuery<City>({
     queryKey: ["/api/cities", cityId],
     queryFn: async () => {
@@ -191,16 +169,12 @@ export default function Hunt() {
     setLocation(`/stats/${roomCode}`);
   };
 
-  const initialCompletedIds = myParticipant?.completedChallengeIds || [];
-
   return (
     <TaskFeed
       cityName={city.name}
       roomCode={roomCode}
       tasks={challenges}
       onSubmit={handleSubmit}
-      onProgressUpdate={handleProgressUpdate}
-      initialCompletedIds={initialCompletedIds}
     />
   );
 }

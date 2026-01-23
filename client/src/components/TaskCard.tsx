@@ -1,16 +1,20 @@
-import { Heart, User } from "lucide-react";
+import { Heart } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
-export type TaskStatus = "incomplete" | "completed-by-me" | "completed-by-friend";
+export type TaskStatus = "incomplete" | "completed-by-me" | "completed-by-others" | "completed-by-me-and-others";
+
+interface CompletionInfo {
+  name: string | null;
+  isMe: boolean;
+}
 
 interface TaskCardProps {
   taskNumber: number;
   imageUrl: string;
   caption: string;
   status: TaskStatus;
-  completedBy?: string;
+  completedBy?: CompletionInfo[];
   onToggle: () => void;
 }
 
@@ -55,7 +59,22 @@ export default function TaskCard({
     triggerToggle();
   };
 
+  const getOthersText = () => {
+    if (!completedBy || completedBy.length === 0) return "";
+    const others = completedBy.filter(c => !c.isMe);
+    if (others.length === 0) return "";
+    
+    const firstName = others[0].name || "teammate";
+    if (others.length === 1) {
+      return `Completed by ${firstName}`;
+    }
+    return `Completed by ${firstName} and ${others.length - 1} other${others.length > 2 ? 's' : ''}`;
+  };
+
   const getStatusContent = () => {
+    const isCompletedByMe = status === "completed-by-me" || status === "completed-by-me-and-others";
+    const isCompletedByOthers = status === "completed-by-others" || status === "completed-by-me-and-others";
+    
     switch (status) {
       case "incomplete":
         return (
@@ -87,32 +106,60 @@ export default function TaskCard({
             </Badge>
           </div>
         );
-      case "completed-by-friend":
+      case "completed-by-others":
         return (
           <div className="flex items-center gap-2">
-            <div className="p-1">
-              <Heart className="h-5 w-5 fill-chart-2 text-chart-2" />
-            </div>
-            <Avatar className="h-6 w-6">
-              <AvatarFallback className="text-xs bg-chart-2 text-white">
-                {completedBy?.charAt(0) || "F"}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-sm text-muted-foreground">
-              Completed by {completedBy || "Friend"}
-            </span>
+            <button
+              onClick={handleHeartClick}
+              className="hover-elevate active-elevate-2 p-1 rounded-full transition-all duration-200"
+              data-testid={`button-heart-${taskNumber}`}
+              aria-label="Mark as complete"
+            >
+              <Heart className="h-5 w-5 fill-chart-2 text-chart-2 transition-all duration-200" />
+            </button>
+            <Badge variant="secondary" className="bg-chart-2 text-white animate-in slide-in-from-left-2">
+              {getOthersText()}
+            </Badge>
+          </div>
+        );
+      case "completed-by-me-and-others":
+        return (
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={handleHeartClick}
+              className="hover-elevate active-elevate-2 p-1 rounded-full transition-all duration-200"
+              data-testid={`button-heart-${taskNumber}`}
+              aria-label="Mark as incomplete"
+            >
+              <Heart className="h-5 w-5 fill-primary text-primary transition-all duration-200" />
+            </button>
+            <Badge variant="default" className="bg-primary text-primary-foreground">
+              Completed by you
+            </Badge>
+            <Badge variant="secondary" className="bg-chart-2 text-white">
+              +{(completedBy?.filter(c => !c.isMe).length || 0)} other{(completedBy?.filter(c => !c.isMe).length || 0) > 1 ? 's' : ''}
+            </Badge>
           </div>
         );
     }
   };
 
+  const isCompletedByMe = status === "completed-by-me" || status === "completed-by-me-and-others";
+  const isCompletedByOthers = status === "completed-by-others" || status === "completed-by-me-and-others";
+
+  const getBorderStyle = () => {
+    if (isCompletedByMe) {
+      return "border-primary shadow-lg shadow-primary/20";
+    }
+    if (isCompletedByOthers) {
+      return "border-chart-2 shadow-lg shadow-chart-2/20";
+    }
+    return "border-card-border";
+  };
+
   return (
     <div className="mb-6" data-testid={`card-task-${taskNumber}`}>
-      <div className={`bg-card rounded-lg overflow-hidden border transition-all duration-300 ${
-        status === "completed-by-me" 
-          ? "border-primary shadow-lg shadow-primary/20" 
-          : "border-card-border"
-      }`}>
+      <div className={`bg-card rounded-lg overflow-hidden border transition-all duration-300 ${getBorderStyle()}`}>
         <div className="p-3 flex items-center justify-between">
           <Badge variant="secondary" className="text-xs">
             Task {taskNumber}
@@ -143,8 +190,11 @@ export default function TaskCard({
             </div>
           )}
           
-          {status === "completed-by-me" && (
+          {isCompletedByMe && (
             <div className="absolute inset-0 border-4 border-primary pointer-events-none animate-in fade-in-0 duration-300" />
+          )}
+          {isCompletedByOthers && !isCompletedByMe && (
+            <div className="absolute inset-0 border-4 border-chart-2 pointer-events-none animate-in fade-in-0 duration-300" />
           )}
         </div>
         

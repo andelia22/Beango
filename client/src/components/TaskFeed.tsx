@@ -1,10 +1,12 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import TaskCard, { type TaskStatus } from "./TaskCard";
 import SubmitButton from "./SubmitButton";
 import RoomHeader from "./RoomHeader";
 import { SignInPrompt } from "./SignInPrompt";
 import { useAuth } from "@/hooks/useAuth";
-import { toggleTaskCompletion } from "@/lib/anonymousStorage";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { getDeviceId } from "@/lib/deviceId";
 
 interface Task {
   id: number;
@@ -12,65 +14,122 @@ interface Task {
   caption: string;
 }
 
+interface ChallengeCompletion {
+  id: string;
+  roomCode: string;
+  challengeId: number;
+  completedByDeviceId: string;
+  completedByUserId: string | null;
+  completedByName: string | null;
+  completedAt: string;
+}
+
+interface CompletionInfo {
+  name: string | null;
+  isMe: boolean;
+}
+
 interface TaskFeedProps {
   cityName: string;
   roomCode: string;
   tasks: Task[];
   onSubmit: () => void;
-  onProgressUpdate?: (completedIds: number[]) => void;
-  initialCompletedIds?: number[];
 }
 
-export default function TaskFeed({ cityName, roomCode, tasks, onSubmit, onProgressUpdate, initialCompletedIds = [] }: TaskFeedProps) {
-  const { isAuthenticated } = useAuth();
-  
-  const buildInitialStatuses = (): Record<number, TaskStatus> => {
-    const statuses: Record<number, TaskStatus> = {};
-    for (const task of tasks) {
-      statuses[task.id] = initialCompletedIds.includes(task.id) ? "completed-by-me" : "incomplete";
-    }
-    return statuses;
-  };
-  
-  const [taskStatuses, setTaskStatuses] = useState<Record<number, TaskStatus>>(buildInitialStatuses);
+export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFeedProps) {
+  const { isAuthenticated, user } = useAuth();
+  const deviceId = getDeviceId();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSignInPrompt, setShowSignInPrompt] = useState(false);
   const [hasShownPromptThisSession, setHasShownPromptThisSession] = useState(false);
-  const isInitialMount = useRef(true);
+  const [pendingToggle, setPendingToggle] = useState<number | null>(null);
 
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
+  const { data: completions = [] } = useQuery<ChallengeCompletion[]>({
+    queryKey: ["/api/rooms", roomCode, "completions"],
+    queryFn: async () => {
+      const response = await fetch(`/api/rooms/${roomCode}/completions`);
+      if (!response.ok) return [];
+      return response.json();
+    },
+    refetchInterval: 2000,
+  });
+
+  const addCompletionMutation = useMutation({
+    mutationFn: async (challengeId: number) => {
+      return apiRequest("POST", `/api/rooms/${roomCode}/challenges/${challengeId}/complete`, {
+        deviceId,
+        userName: user?.firstName || null,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/rooms", roomCode, "completions"] });
+    },
+  });
+
+  const removeCompletionMutation = useMutation({
+    mutationFn: async (challengeId: number) => {
+      return apiRequest("DELETE", `/api/rooms/${roomCode}/challenges/${challengeId}/complete`, {
+        deviceId,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/rooms", roomCode, "completions"] });
+    },
+  });
+
+  const getCompletionsForTask = (taskId: number): CompletionInfo[] => {
+    return completions
+      .filter(c => c.challengeId === taskId)
+      .map(c => ({
+        name: c.completedByName,
+        isMe: c.completedByDeviceId === deviceId,
+      }));
+  };
+
+  const getTaskStatus = (taskId: number): TaskStatus => {
+    const taskCompletions = getCompletionsForTask(taskId);
+    const completedByMe = taskCompletions.some(c => c.isMe);
+    const completedByOthers = taskCompletions.some(c => !c.isMe);
+
+    if (completedByMe && completedByOthers) {
+      return "completed-by-me-and-others";
     }
-    
-    const completedIds = Object.entries(taskStatuses)
-      .filter(([_, status]) => status !== "incomplete")
-      .map(([id]) => parseInt(id, 10));
-    
-    onProgressUpdate?.(completedIds);
-  }, [taskStatuses]);
+    if (completedByMe) {
+      return "completed-by-me";
+    }
+    if (completedByOthers) {
+      return "completed-by-others";
+    }
+    return "incomplete";
+  };
 
-  const handleTaskToggle = (taskId: number) => {
-    const newStatus = taskStatuses[taskId] === "completed-by-me" ? "incomplete" : "completed-by-me";
+  const handleTaskToggle = async (taskId: number) => {
+    if (pendingToggle === taskId) return;
     
-    setTaskStatuses((prev) => ({
-      ...prev,
-      [taskId]: newStatus,
-    }));
-
-    if (!isAuthenticated) {
-      toggleTaskCompletion(roomCode, taskId.toString(), newStatus === "completed-by-me");
-      
-      if (newStatus === "completed-by-me" && !hasShownPromptThisSession) {
-        setShowSignInPrompt(true);
-        setHasShownPromptThisSession(true);
+    const currentStatus = getTaskStatus(taskId);
+    const isCurrentlyCompletedByMe = currentStatus === "completed-by-me" || currentStatus === "completed-by-me-and-others";
+    
+    setPendingToggle(taskId);
+    
+    try {
+      if (isCurrentlyCompletedByMe) {
+        await removeCompletionMutation.mutateAsync(taskId);
+      } else {
+        await addCompletionMutation.mutateAsync(taskId);
+        
+        if (!isAuthenticated && !hasShownPromptThisSession) {
+          setShowSignInPrompt(true);
+          setHasShownPromptThisSession(true);
+        }
       }
+    } catch (error) {
+      console.error("Failed to toggle task:", error);
+    } finally {
+      setPendingToggle(null);
     }
   };
 
   const handleSubmit = () => {
-    console.log("Submitting scavenger hunt!");
     setIsSubmitting(true);
     setTimeout(() => {
       setIsSubmitting(false);
@@ -78,9 +137,8 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit, onProgre
     }, 2000);
   };
 
-  const completedCount = Object.values(taskStatuses).filter(
-    (status) => status !== "incomplete"
-  ).length;
+  const completedTaskIds = new Set(completions.map(c => c.challengeId));
+  const completedCount = completedTaskIds.size;
 
   return (
     <div className="min-h-screen bg-background">
@@ -93,7 +151,8 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit, onProgre
             taskNumber={task.id}
             imageUrl={task.imageUrl}
             caption={task.caption}
-            status={taskStatuses[task.id]}
+            status={getTaskStatus(task.id)}
+            completedBy={getCompletionsForTask(task.id)}
             onToggle={() => handleTaskToggle(task.id)}
           />
         ))}
