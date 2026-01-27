@@ -212,10 +212,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const roomsWithProgress = await Promise.all(
         rooms.map(async (room) => {
-          const participant = await storage.getParticipant(room.code, deviceId);
+          // Count unique completed challenges from challenge_completions table
+          const completions = await storage.getChallengeCompletionsByRoom(room.code);
+          const uniqueChallengeIds = new Set(completions.map(c => c.challengeId));
           return {
             ...room,
-            completedCount: participant?.completedChallengeIds?.length || 0,
+            completedCount: uniqueChallengeIds.size,
           };
         })
       );
@@ -234,10 +236,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const roomsWithProgress = await Promise.all(
         rooms.map(async (room) => {
-          const participant = await storage.getParticipantByUserId(room.code, userId);
+          // Count unique completed challenges from challenge_completions table
+          const completions = await storage.getChallengeCompletionsByRoom(room.code);
+          const uniqueChallengeIds = new Set(completions.map(c => c.challengeId));
           return {
             ...room,
-            completedCount: participant?.completedChallengeIds?.length || 0,
+            completedCount: uniqueChallengeIds.size,
           };
         })
       );
