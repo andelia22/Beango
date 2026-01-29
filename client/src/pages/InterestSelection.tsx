@@ -8,19 +8,12 @@ import { useToast } from "@/hooks/use-toast";
 import mascotImage from "@assets/coming-soon-real_1763827924724.png";
 
 const TRAVEL_INTERESTS = [
-  "Culture & History",
+  "Iconic Landmarks",
   "Nature & Outdoors",
-  "Food & Drink",
-  "Shopping & Markets",
-  "Art & Creativity",
-  "Photo & Video Challenges",
-  "Puzzles & Clues",
-  "Social & Interaction",
-  "Movement & Exploration",
-  "Sports & Play",
-  "Nightlife & Ambience",
-  "Audio / Sound-Based",
-  "Group Challenges"
+  "Food & Drinks",
+  "History & Culture",
+  "Nightlife",
+  "Local Life"
 ];
 
 export default function InterestSelection() {
