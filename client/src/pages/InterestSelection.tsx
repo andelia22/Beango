@@ -75,7 +75,7 @@ export default function InterestSelection() {
             <img 
               src={mascotImage} 
               alt="BeanGo Mascot" 
-              className="w-14 md:w-24 h-auto"
+              className="w-20 md:w-32 h-auto"
               data-testid="img-mascot"
             />
           </div>
