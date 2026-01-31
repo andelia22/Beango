@@ -402,6 +402,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get leaderboard for a room (aggregated completions by user)
+  app.get("/api/rooms/:code/leaderboard", async (req, res) => {
+    try {
+      const { code } = req.params;
+      const completions = await storage.getChallengeCompletionsByRoom(code);
+      
+      // Aggregate completions by user (using either userId or deviceId as identifier)
+      const userMap = new Map<string, { id: string; name: string; tasksCompleted: number }>();
+      
+      for (const completion of completions) {
+        // Use unique key: prefer visibleId (original deviceId) for unique user tracking
+        // since the same person may complete multiple tasks
+        const key = completion.completedByUserId || completion.completedByDeviceId;
+        const name = completion.completedByName || "Anonymous";
+        
+        if (userMap.has(key)) {
+          const user = userMap.get(key)!;
+          user.tasksCompleted += 1;
+          // Use latest name if available
+          if (completion.completedByName) {
+            user.name = completion.completedByName;
+          }
+        } else {
+          userMap.set(key, {
+            id: key,
+            name: name,
+            tasksCompleted: 1,
+          });
+        }
+      }
+      
+      // Convert to array and sort by tasksCompleted descending
+      const leaderboard = Array.from(userMap.values()).sort(
+        (a, b) => b.tasksCompleted - a.tasksCompleted
+      );
+      
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Error fetching leaderboard:", error);
+      res.status(500).json({ error: "Failed to fetch leaderboard" });
+    }
+  });
+
   // Add a challenge completion
   app.post("/api/rooms/:code/challenges/:challengeId/complete", async (req: any, res) => {
     try {
