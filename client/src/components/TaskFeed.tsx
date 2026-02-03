@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import PullToRefresh from "react-simple-pull-to-refresh";
 import TaskCard, { type TaskStatus } from "./TaskCard";
@@ -51,6 +51,7 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
   const [showSignInPrompt, setShowSignInPrompt] = useState(false);
   const [hasShownPromptThisSession, setHasShownPromptThisSession] = useState(false);
   const [pendingToggle, setPendingToggle] = useState<number | null>(null);
+  const refreshStepIndexRef = useRef<number>(0);
 
   const { data: completions = [] } = useQuery<ChallengeCompletion[]>({
     queryKey: ["/api/rooms", roomCode, "completions"],
@@ -173,6 +174,9 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
       });
     },
     onSuccess: async () => {
+      // Preserve step position BEFORE query invalidation triggers re-renders
+      setActiveStepIndex(refreshStepIndexRef.current);
+      
       await queryClient.invalidateQueries({ queryKey: ["/api/rooms", roomCode] });
       await queryClient.invalidateQueries({ queryKey: ["/api/cities"] });
       toast({
@@ -199,15 +203,12 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
       return;
     }
     
-    // Capture current step before refresh
-    const currentStep = activeStepIndex;
+    // Store current step in ref before mutation (accessible in onSuccess)
+    refreshStepIndexRef.current = activeStepIndex;
     
     const idsToReplace = incompleteInCurrentStep.map(c => c.id);
     await refreshMutation.mutateAsync(idsToReplace);
-    
-    // Preserve step position after refresh to prevent auto-navigation
-    setActiveStepIndex(currentStep);
-  }, [incompleteInCurrentStep, refreshMutation, toast, hasIncompleteChallenges, activeStepIndex, setActiveStepIndex]);
+  }, [incompleteInCurrentStep, refreshMutation, toast, hasIncompleteChallenges, activeStepIndex]);
 
   const currentStepChallenges = activeStep?.challenges || [];
   const canGoBack = activeStepIndex > 0 && canNavigateToStep(activeStepIndex - 1);
