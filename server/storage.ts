@@ -345,7 +345,7 @@ export class DatabaseStorage implements IStorage {
       .set({ 
         status: "in_progress", 
         selectedChallengeIds,
-        totalChallenges: 24,
+        totalChallenges: selectedChallengeIds.length,
         updatedAt: new Date() 
       })
       .where(eq(roomsTable.code, code))

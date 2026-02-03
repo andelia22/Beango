@@ -69,7 +69,7 @@ export default function Stats() {
         roomCode={roomCode}
         cityName={city?.name || room?.cityName || ""}
         participants={leaderboard}
-        totalTasks={room?.totalChallenges || 24}
+        totalTasks={room?.totalChallenges || 15}
         onBackToHome={() => setLocation("/welcome")}
       />
       {showSignInPrompt && (

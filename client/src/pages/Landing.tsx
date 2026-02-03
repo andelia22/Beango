@@ -71,7 +71,7 @@ export default function Landing() {
                 <MapPin className="w-5 h-5 text-pink-600 dark:text-pink-400" />
               </div>
               <div>
-                <h3 className="font-semibold text-sm">24 Challenges Per City</h3>
+                <h3 className="font-semibold text-sm">15 Challenges Per City</h3>
                 <p className="text-sm text-muted-foreground">
                   Complete location-based tasks and discover hidden gems
                 </p>
