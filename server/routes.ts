@@ -379,7 +379,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const allChallenges = await storage.getCityChallenges(room.cityId);
       
-      const selectedChallengeIds = selectChallengesForGroup(allChallenges, participantInterests, 15);
+      // Filter out challenges with placeholder images so they don't appear in hunts
+      const availableChallenges = allChallenges.filter(c => 
+        !c.imageUrl?.includes('placeholder.jpg')
+      );
+      
+      const selectedChallengeIds = selectChallengesForGroup(availableChallenges, participantInterests, 15);
       
       const updatedRoom = await storage.startHunt(code, selectedChallengeIds);
       
@@ -518,9 +523,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Find available challenges (not currently in use, excluding ones being replaced)
+      // Find available challenges (not currently in use, excluding ones being replaced, and no placeholders)
       const availableChallenges = allChallenges.filter(c => 
-        !currentlySelectedSet.has(c.id)
+        !currentlySelectedSet.has(c.id) && !c.imageUrl?.includes('placeholder.jpg')
       );
       
       if (availableChallenges.length < challengeIdsToReplace.length) {
