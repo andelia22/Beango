@@ -523,9 +523,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Find available challenges (not currently in use, excluding ones being replaced, and no placeholders)
+      // Get completions for this room to exclude already-completed challenges
+      const completions = await storage.getChallengeCompletionsByRoom(code);
+      const completedChallengeIds = new Set(completions.map(c => c.challengeId));
+      
+      // Find available challenges (not currently in use, not already completed in this room, and no placeholders)
       const availableChallenges = allChallenges.filter(c => 
-        !currentlySelectedSet.has(c.id) && !c.imageUrl?.includes('placeholder.jpg')
+        !currentlySelectedSet.has(c.id) && 
+        !completedChallengeIds.has(c.id) &&
+        !c.imageUrl?.includes('placeholder.jpg')
       );
       
       if (availableChallenges.length < challengeIdsToReplace.length) {
