@@ -62,7 +62,7 @@ export default function WelcomeScreen({ onCreateRoom, onJoinRoom }: WelcomeScree
                 <Camera className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <p className="font-medium text-sm">24 Unique Challenges</p>
+                <p className="font-medium text-sm">15 Unique Challenges</p>
                 <p className="text-xs text-muted-foreground">
                   Complete the BeanGo board across the city
                 </p>
