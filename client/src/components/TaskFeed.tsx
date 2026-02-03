@@ -199,9 +199,15 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
       return;
     }
     
+    // Capture current step before refresh
+    const currentStep = activeStepIndex;
+    
     const idsToReplace = incompleteInCurrentStep.map(c => c.id);
     await refreshMutation.mutateAsync(idsToReplace);
-  }, [incompleteInCurrentStep, refreshMutation, toast, hasIncompleteChallenges]);
+    
+    // Preserve step position after refresh to prevent auto-navigation
+    setActiveStepIndex(currentStep);
+  }, [incompleteInCurrentStep, refreshMutation, toast, hasIncompleteChallenges, activeStepIndex, setActiveStepIndex]);
 
   const currentStepChallenges = activeStep?.challenges || [];
   const canGoBack = activeStepIndex > 0 && canNavigateToStep(activeStepIndex - 1);

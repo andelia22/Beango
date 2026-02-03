@@ -116,14 +116,11 @@ export function useStepProgression({
     const wasAlreadyCompleted = prevCompletedSteps.current.has(activeStepIndex);
     const isNowCompleted = currentStep.status === "completed";
     
-    // Only auto-navigate forward when the current step just became completed
-    // Never navigate backwards - this prevents refresh from moving users to previous steps
     if (isNowCompleted && !wasAlreadyCompleted) {
       const nextUnlockedIndex = steps.findIndex(
         (s, idx) => idx > activeStepIndex && (s.status === "unlocked" || s.status === "completed")
       );
-      // Only navigate if the target index is greater than current (forward only)
-      if (nextUnlockedIndex !== -1 && nextUnlockedIndex > activeStepIndex) {
+      if (nextUnlockedIndex !== -1) {
         setActiveStepIndexInternal(nextUnlockedIndex);
       }
     }
