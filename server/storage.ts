@@ -53,6 +53,7 @@ export interface IStorage {
   updateRoomStatus(code: string, status: string): Promise<Room | undefined>;
   startHunt(code: string, selectedChallengeIds: number[]): Promise<Room | undefined>;
   swapChallenges(code: string, oldChallengeIds: number[], newChallengeIds: number[]): Promise<Room | undefined>;
+  shuffleIncompleteChallenges(code: string, completedChallengeIds: Set<number>): Promise<Room | undefined>;
   getRoomsByDeviceId(deviceId: string): Promise<Room[]>;
   getRoomsByUserId(userId: string): Promise<Room[]>;
   getParticipantInterests(roomCode: string): Promise<string[][]>;
@@ -162,6 +163,9 @@ export class MemStorage implements IStorage {
     throw new Error("Not implemented");
   }
   async swapChallenges(_code: string, _oldChallengeIds: number[], _newChallengeIds: number[]): Promise<Room | undefined> {
+    throw new Error("Not implemented in MemStorage");
+  }
+  async shuffleIncompleteChallenges(_code: string, _completedChallengeIds: Set<number>): Promise<Room | undefined> {
     throw new Error("Not implemented in MemStorage");
   }
   async getRoomsByDeviceId(_deviceId: string): Promise<Room[]> {
@@ -367,6 +371,43 @@ export class DatabaseStorage implements IStorage {
       }
       return id;
     });
+    
+    const updated = await db
+      .update(roomsTable)
+      .set({ 
+        selectedChallengeIds: updatedIds,
+        updatedAt: new Date() 
+      })
+      .where(eq(roomsTable.code, code))
+      .returning();
+    return updated[0];
+  }
+
+  async shuffleIncompleteChallenges(code: string, completedChallengeIds: Set<number>): Promise<Room | undefined> {
+    const room = await this.getRoom(code);
+    if (!room || !room.selectedChallengeIds) return undefined;
+    
+    const currentIds = [...room.selectedChallengeIds];
+    
+    // Find indices of incomplete challenges
+    const incompleteIndices: number[] = [];
+    const incompleteIds: number[] = [];
+    
+    for (let i = 0; i < currentIds.length; i++) {
+      if (!completedChallengeIds.has(currentIds[i])) {
+        incompleteIndices.push(i);
+        incompleteIds.push(currentIds[i]);
+      }
+    }
+    
+    // Shuffle the incomplete IDs
+    const shuffledIncompleteIds = [...incompleteIds].sort(() => Math.random() - 0.5);
+    
+    // Create new array with completed at same positions, incomplete shuffled
+    const updatedIds = [...currentIds];
+    for (let i = 0; i < incompleteIndices.length; i++) {
+      updatedIds[incompleteIndices[i]] = shuffledIncompleteIds[i];
+    }
     
     const updated = await db
       .update(roomsTable)

@@ -493,66 +493,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Swap incomplete challenges with new ones from the pool
+  // Shuffle incomplete challenges within the room's fixed 15-task pool
   app.post("/api/rooms/:code/refresh-challenges", async (req: any, res) => {
     try {
       const { code } = req.params;
-      const { challengeIdsToReplace } = req.body;
-      
-      if (!Array.isArray(challengeIdsToReplace) || challengeIdsToReplace.length === 0) {
-        return res.status(400).json({ error: "challengeIdsToReplace must be a non-empty array" });
-      }
       
       const room = await storage.getRoom(code);
       if (!room) {
         return res.status(404).json({ error: "Room not found" });
       }
       
-      const cityId = room.cityId;
-      const allChallenges = await storage.getCityChallenges(cityId);
-      if (!allChallenges || allChallenges.length === 0) {
-        return res.status(404).json({ error: "City challenges not found" });
-      }
-      
-      const currentlySelectedSet = new Set(room.selectedChallengeIds || []);
-      
-      // Validate all requested IDs are actually in the room's selected challenges
-      for (const id of challengeIdsToReplace) {
-        if (!currentlySelectedSet.has(id)) {
-          return res.status(400).json({ error: `Challenge ID ${id} is not in this room's selected challenges` });
-        }
-      }
-      
-      // Get completions for this room to exclude already-completed challenges
+      // Get completions for this room to identify completed challenges
       const completions = await storage.getChallengeCompletionsByRoom(code);
       const completedChallengeIds = new Set(completions.map(c => c.challengeId));
       
-      // Find available challenges (not currently in use, not already completed in this room, and no placeholders)
-      const availableChallenges = allChallenges.filter(c => 
-        !currentlySelectedSet.has(c.id) && 
-        !completedChallengeIds.has(c.id) &&
-        !c.imageUrl?.includes('placeholder.jpg')
-      );
+      // Shuffle all incomplete challenges within the room's fixed 15-task pool
+      // Completed challenges stay at their indices, only incomplete ones are shuffled
+      const updatedRoom = await storage.shuffleIncompleteChallenges(code, completedChallengeIds);
       
-      if (availableChallenges.length < challengeIdsToReplace.length) {
-        return res.status(400).json({ error: "Not enough challenges available to swap" });
+      if (!updatedRoom) {
+        return res.status(404).json({ error: "Failed to update room" });
       }
-      
-      // Randomly select new challenges
-      const shuffled = availableChallenges.sort(() => Math.random() - 0.5);
-      const newChallengeIds = shuffled.slice(0, challengeIdsToReplace.length).map(c => c.id);
-      
-      if (newChallengeIds.length !== challengeIdsToReplace.length) {
-        return res.status(400).json({ error: "Could not find enough replacement challenges" });
-      }
-      
-      const updatedRoom = await storage.swapChallenges(code, challengeIdsToReplace, newChallengeIds);
       
       res.json({ 
         success: true, 
-        swapped: challengeIdsToReplace.length,
-        newChallengeIds,
-        selectedChallengeIds: updatedRoom?.selectedChallengeIds 
+        selectedChallengeIds: updatedRoom.selectedChallengeIds 
       });
     } catch (error) {
       console.error("Error refreshing challenges:", error);

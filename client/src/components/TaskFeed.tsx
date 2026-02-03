@@ -168,10 +168,8 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
   const hasIncompleteChallenges = incompleteInCurrentStep.length > 0;
 
   const refreshMutation = useMutation({
-    mutationFn: async (challengeIdsToReplace: number[]) => {
-      return apiRequest("POST", `/api/rooms/${roomCode}/refresh-challenges`, {
-        challengeIdsToReplace,
-      });
+    mutationFn: async () => {
+      return apiRequest("POST", `/api/rooms/${roomCode}/refresh-challenges`, {});
     },
     onSuccess: async () => {
       // Preserve step position BEFORE query invalidation triggers re-renders
@@ -181,7 +179,7 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
       await queryClient.invalidateQueries({ queryKey: ["/api/cities"] });
       toast({
         title: "Challenges refreshed",
-        description: "New challenges loaded for this step.",
+        description: "Tasks shuffled within your room.",
       });
     },
     onError: (error: Error) => {
@@ -206,9 +204,8 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
     // Store current step in ref before mutation (accessible in onSuccess)
     refreshStepIndexRef.current = activeStepIndex;
     
-    const idsToReplace = incompleteInCurrentStep.map(c => c.id);
-    await refreshMutation.mutateAsync(idsToReplace);
-  }, [incompleteInCurrentStep, refreshMutation, toast, hasIncompleteChallenges, activeStepIndex]);
+    await refreshMutation.mutateAsync();
+  }, [refreshMutation, toast, hasIncompleteChallenges, activeStepIndex]);
 
   const currentStepChallenges = activeStep?.challenges || [];
   const canGoBack = activeStepIndex > 0 && canNavigateToStep(activeStepIndex - 1);
