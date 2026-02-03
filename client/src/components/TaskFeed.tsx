@@ -1,6 +1,5 @@
 import { useState, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import PullToRefresh from "react-pull-to-refresh";
 import TaskCard, { type TaskStatus } from "./TaskCard";
 import SubmitButton from "./SubmitButton";
 import RoomHeader from "./RoomHeader";
@@ -207,7 +206,6 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
   const canGoBack = activeStepIndex > 0 && canNavigateToStep(activeStepIndex - 1);
   const canGoForward = activeStepIndex < steps.length - 1 && canNavigateToStep(activeStepIndex + 1);
   const isAllComplete = totalCompletedCount >= tasks.length;
-  const pullToRefreshDisabled = !hasIncompleteChallenges || isAllComplete;
 
   return (
     <div className="min-h-screen bg-background">
@@ -220,12 +218,7 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
         canNavigateToStep={canNavigateToStep}
       />
       
-      <PullToRefresh
-        onRefresh={handleRefresh}
-        disabled={pullToRefreshDisabled}
-        className="max-w-2xl mx-auto px-4 py-6"
-        resistance={2.5}
-      >
+      <div className="max-w-2xl mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-4">
           <Button
             variant="ghost"
@@ -260,19 +253,18 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
         </div>
 
         {hasIncompleteChallenges && !isAllComplete && (
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <p className="text-xs text-muted-foreground">
-              Pull down to swap {incompleteInCurrentStep.length} incomplete {incompleteInCurrentStep.length === 1 ? 'challenge' : 'challenges'}
-            </p>
-            <button
+          <div className="flex items-center justify-center mb-4">
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={handleRefresh}
               disabled={refreshMutation.isPending}
-              className="text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
               data-testid="button-refresh-step"
-              aria-label="Refresh incomplete challenges"
+              aria-label="Swap incomplete challenges"
             >
-              <RefreshCw className={`h-4 w-4 ${refreshMutation.isPending ? 'animate-spin' : ''}`} />
-            </button>
+              <RefreshCw className={`h-4 w-4 mr-2 ${refreshMutation.isPending ? 'animate-spin' : ''}`} />
+              Swap {incompleteInCurrentStep.length} incomplete {incompleteInCurrentStep.length === 1 ? 'challenge' : 'challenges'}
+            </Button>
           </div>
         )}
 
@@ -294,7 +286,7 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
         />
-      </PullToRefresh>
+      </div>
 
       {showSignInPrompt && (
         <SignInPrompt
