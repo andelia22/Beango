@@ -1,0 +1,173 @@
+Developer Plan: Steps + Stories UX + Controlled Refresh (Built on Current Completion Logic)
+Goal
+
+Change the hunt UI from a flat list of 24 tasks to a step-based flow (8 steps × 3 tasks) with Instagram Stories-style navigation, while preserving:
+
+the existing 24-task selection algorithm
+
+the existing per-user completion toggles
+
+the existing card styling that communicates who completed a task
+
+1) Hunt generation remains unchanged
+
+On Start Hunt, generate and persist a fixed list of 24 challenges for the room using the existing interest-weighted selection algorithm.
+
+This list of 24 is the global hunt pool and must not change during the hunt (no new tasks introduced).
+
+2) Step model and grouping
+
+Partition the 24 challenges into 8 ordered steps, each containing 3 unique challenge IDs.
+
+Persist step composition (so all users in the room see the same grouping).
+
+Suggested structure (conceptually):
+
+hunt.challengePool[24]
+
+hunt.steps[8] where each step has challengeIds[3], status, previewImage
+
+3) Stories-style step navigation (top of board)
+
+Render 8 circles at the top of the board (Instagram Stories pattern).
+
+Each circle represents a step and supports states:
+
+Step circle states
+
+Locked
+
+greyed/blurred
+
+not tappable
+
+Unlocked
+
+normal
+
+tappable
+
+Completed
+
+normal + pink ring around the circle
+
+Step circle image requirement
+
+Each circle’s thumbnail image must come from that step’s tasks:
+
+randomly select one of the 3 tasks in that step
+
+use that task’s image as the circle thumbnail
+
+Keep the chosen thumbnail stable unless step composition changes (due to refresh swaps).
+
+4) Board view behavior
+
+Default board view shows the current active step (3 task cards).
+
+Users can tap an unlocked circle to view that step’s 3 task cards.
+
+Locked steps are not accessible until unlocked.
+
+5) Task completion behavior and card styling (unchanged)
+
+Completion remains per-user and toggle-based:
+
+Double tap toggles completion for the current user only
+
+user can complete/uncomplete their own completion state
+
+Multiple users can complete the same task independently
+
+A user cannot uncomplete a task for someone else
+
+Card UI signals (unchanged)
+
+Completed by me
+
+pink border
+
+pink heart
+
+Completed by someone else (but not me)
+
+purple border
+
+purple heart
+
+(If both “me” and “someone else” completed it, keep the existing “completed by me” styling behavior you already have, since the user’s completion is most relevant to them.)
+
+This logic should remain exactly as-is.
+
+6) Step completion and unlocking rules
+Definition (explicit)
+
+A step is considered complete when all 3 challenges have at least one completion by someone in the room (global/room-level completion, not “by me”).
+
+Implementation-wise: each challenge needs a room-level “completedBy” set (or equivalent), and the step is complete when each of its 3 challenges has completedBy.size >= 1.
+
+Unlock behavior
+
+When a step becomes complete:
+
+mark that step as Completed (pink ring on circle)
+
+unlock the next step (if it exists)
+
+Permanent unlock rule
+
+Once a step is unlocked, it stays unlocked.
+
+If someone later uncompletes a task they completed in a previously completed step:
+
+step completion state may change (depending on whether that task still has at least one completion by someone)
+
+BUT any steps already unlocked remain unlocked
+
+no re-locking
+
+This prevents progress rollback and matches current behavior expectations.
+
+7) Refresh mechanic (scroll-to-refresh) on active step
+
+Refresh is only available for the currently active step and triggered via scroll-to-refresh.
+
+What refresh does
+
+Refresh replaces tasks in the active step that are globally incomplete, meaning:
+
+the task has zero completions by anyone in the room
+
+Replacement source
+
+Replacement tasks must come from locked steps only and must be:
+
+globally incomplete (no one has completed them)
+
+not already present in the active step
+
+Refresh does not introduce new tasks; it only reassigns tasks between steps, always within the original 24.
+
+Result
+
+The hunt’s global pool of 24 tasks remains the same.
+
+Some tasks may move from locked steps into the active step, and vice versa (swap/reallocation).
+
+After refresh
+
+Update the active step’s story-circle thumbnail:
+
+randomly select one of the step’s current 3 tasks and use its image
+
+keep stable until the next composition change
+
+8) Expected user experience outcomes
+
+Users focus on 3 tasks at a time while still feeling the full hunt progression via story circles.
+
+The board communicates completion ownership clearly (pink vs purple).
+
+Steps unlock as the group completes each set of 3 (at least one completion per task).
+
+Refresh provides flexibility without breaking fairness or regenerating the hunt.
