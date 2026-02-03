@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import PullToRefresh from "react-simple-pull-to-refresh";
 import TaskCard, { type TaskStatus } from "./TaskCard";
 import SubmitButton from "./SubmitButton";
 import RoomHeader from "./RoomHeader";
@@ -208,93 +209,107 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
   const isAllComplete = totalCompletedCount >= tasks.length;
 
   return (
-    <div className="min-h-screen bg-background">
-      <RoomHeader cityName={cityName} roomCode={roomCode} />
-      
-      <StepNavigationBar
-        steps={steps}
-        activeStepIndex={activeStepIndex}
-        onStepClick={setActiveStepIndex}
-        canNavigateToStep={canNavigateToStep}
-      />
-      
-      <div className="max-w-2xl mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={navigateToPreviousStep}
-            disabled={!canGoBack}
-            className="h-10 w-10"
-            data-testid="button-prev-step"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
-          
-          <div className="text-center">
-            <h2 className="text-lg font-semibold" data-testid="text-step-title">
-              Step {activeStepIndex + 1} of {steps.length}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {activeStep?.completedCount || 0} / {currentStepChallenges.length} complete
-            </p>
-          </div>
-          
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={navigateToNextStep}
-            disabled={!canGoForward}
-            className="h-10 w-10"
-            data-testid="button-next-step"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </Button>
+    <PullToRefresh
+      onRefresh={handleRefresh}
+      pullingContent={
+        <div className="flex items-center justify-center py-4">
+          <RefreshCw className="h-5 w-5 text-muted-foreground" />
         </div>
-
-        {hasIncompleteChallenges && !isAllComplete && (
-          <div className="flex items-center justify-center mb-4">
+      }
+      refreshingContent={
+        <div className="flex items-center justify-center py-4">
+          <RefreshCw className="h-5 w-5 text-primary animate-spin" />
+        </div>
+      }
+    >
+      <div className="min-h-screen bg-background">
+        <RoomHeader cityName={cityName} roomCode={roomCode} />
+        
+        <StepNavigationBar
+          steps={steps}
+          activeStepIndex={activeStepIndex}
+          onStepClick={setActiveStepIndex}
+          canNavigateToStep={canNavigateToStep}
+        />
+        
+        <div className="max-w-2xl mx-auto px-4 py-6">
+          <div className="flex items-center justify-between mb-4">
             <Button
               variant="ghost"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={refreshMutation.isPending}
-              data-testid="button-refresh-step"
-              aria-label="Swap incomplete challenges"
+              size="icon"
+              onClick={navigateToPreviousStep}
+              disabled={!canGoBack}
+              className="h-10 w-10"
+              data-testid="button-prev-step"
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${refreshMutation.isPending ? 'animate-spin' : ''}`} />
-              Swap {incompleteInCurrentStep.length} incomplete {incompleteInCurrentStep.length === 1 ? 'challenge' : 'challenges'}
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            
+            <div className="text-center">
+              <h2 className="text-lg font-semibold" data-testid="text-step-title">
+                Step {activeStepIndex + 1} of {steps.length}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {activeStep?.completedCount || 0} / {currentStepChallenges.length} complete
+              </p>
+            </div>
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={navigateToNextStep}
+              disabled={!canGoForward}
+              className="h-10 w-10"
+              data-testid="button-next-step"
+            >
+              <ChevronRight className="h-5 w-5" />
             </Button>
           </div>
-        )}
 
-        {currentStepChallenges.map((task) => (
-          <TaskCard
-            key={task.id}
-            taskNumber={task.id}
-            imageUrl={task.imageUrl}
-            caption={task.caption}
-            status={getTaskStatus(task.id)}
-            completedBy={getCompletionsForTask(task.id)}
-            onToggle={() => handleTaskToggle(task.id)}
+          {hasIncompleteChallenges && !isAllComplete && (
+            <div className="flex items-center justify-center mb-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={refreshMutation.isPending}
+                data-testid="button-refresh-step"
+                aria-label="Swap incomplete challenges"
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${refreshMutation.isPending ? 'animate-spin' : ''}`} />
+                Swap {incompleteInCurrentStep.length} incomplete {incompleteInCurrentStep.length === 1 ? 'challenge' : 'challenges'}
+              </Button>
+            </div>
+          )}
+
+          {currentStepChallenges.map((task) => (
+            <TaskCard
+              key={task.id}
+              taskNumber={task.id}
+              imageUrl={task.imageUrl}
+              caption={task.caption}
+              status={getTaskStatus(task.id)}
+              completedBy={getCompletionsForTask(task.id)}
+              onToggle={() => handleTaskToggle(task.id)}
+            />
+          ))}
+          
+          <SubmitButton
+            totalTasks={tasks.length}
+            completedTasks={totalCompletedCount}
+            onSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
           />
-        ))}
-        
-        <SubmitButton
-          totalTasks={tasks.length}
-          completedTasks={totalCompletedCount}
-          onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-        />
-      </div>
+        </div>
 
-      {showSignInPrompt && (
-        <SignInPrompt
-          message="Nice work! Sign in to save your progress and see all your completed BeanGos"
-          onDismiss={() => setShowSignInPrompt(false)}
-          suppressAfterDismiss={true}
-        />
-      )}
-    </div>
+        {showSignInPrompt && (
+          <SignInPrompt
+            message="Nice work! Sign in to save your progress and see all your completed BeanGos"
+            onDismiss={() => setShowSignInPrompt(false)}
+            suppressAfterDismiss={true}
+          />
+        )}
+      </div>
+    </PullToRefresh>
   );
 }
