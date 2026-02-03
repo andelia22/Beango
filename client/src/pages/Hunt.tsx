@@ -77,10 +77,13 @@ export default function Hunt() {
       }
       const allChallenges: Challenge[] = await response.json();
       
-      // If room has selected challenges, filter to only show those
+      // If room has selected challenges, map over selectedChallengeIds to preserve order
+      // This ensures challenges stay in their fixed positions during refresh
       if (selectedChallengeIds && selectedChallengeIds.length > 0) {
-        const selectedSet = new Set(selectedChallengeIds);
-        return allChallenges.filter(c => selectedSet.has(c.id));
+        const challengeMap = new Map(allChallenges.map(c => [c.id, c]));
+        return selectedChallengeIds
+          .map(id => challengeMap.get(id))
+          .filter((c): c is Challenge => c !== undefined);
       }
       
       // Fallback for rooms created before this feature
