@@ -379,7 +379,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const allChallenges = await storage.getCityChallenges(room.cityId);
       
-      const selectedChallengeIds = selectChallengesForGroup(allChallenges, participantInterests, 12);
+      const selectedChallengeIds = selectChallengesForGroup(allChallenges, participantInterests, 15);
       
       const updatedRoom = await storage.startHunt(code, selectedChallengeIds);
       

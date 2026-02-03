@@ -84,7 +84,7 @@ export default function Hunt() {
       }
       
       // Fallback for rooms created before this feature
-      return allChallenges.slice(0, 12);
+      return allChallenges.slice(0, 15);
     },
     enabled: !!cityId,
   });
