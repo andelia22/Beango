@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useRoute, useLocation } from "wouter";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, keepPreviousData } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -90,6 +90,7 @@ export default function Hunt() {
       return allChallenges.slice(0, 15);
     },
     enabled: !!cityId,
+    placeholderData: keepPreviousData,
   });
 
   if (roomLoading || isLoading || !city) {
