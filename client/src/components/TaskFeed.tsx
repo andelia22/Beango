@@ -1,5 +1,6 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import PullToRefresh from "react-pull-to-refresh";
 import TaskCard, { type TaskStatus } from "./TaskCard";
 import SubmitButton from "./SubmitButton";
 import RoomHeader from "./RoomHeader";
@@ -7,7 +8,6 @@ import StepNavigationBar from "./StepNavigationBar";
 import { SignInPrompt } from "./SignInPrompt";
 import { useAuth } from "@/hooks/useAuth";
 import { useStepProgression, type StepChallenge } from "@/hooks/useStepProgression";
-import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { getDeviceId } from "@/lib/deviceId";
 import { ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
@@ -51,7 +51,6 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
   const [showSignInPrompt, setShowSignInPrompt] = useState(false);
   const [hasShownPromptThisSession, setHasShownPromptThisSession] = useState(false);
   const [pendingToggle, setPendingToggle] = useState<number | null>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
 
   const { data: completions = [] } = useQuery<ChallengeCompletion[]>({
     queryKey: ["/api/rooms", roomCode, "completions"],
@@ -101,55 +100,56 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
     },
   });
 
-  const getCompletionsForTask = (taskId: number): CompletionInfo[] => {
-    return completions
-      .filter(c => c.challengeId === taskId)
-      .map(c => ({
-        name: c.completedByName,
-        isMe: (isAuthenticated && user?.id && c.completedByUserId === user.id) || c.completedByDeviceId === deviceId,
-      }));
+  const getTaskStatus = (taskId: number): TaskStatus => {
+    const taskCompletions = completions.filter(c => c.challengeId === taskId);
+    if (taskCompletions.length === 0) return "incomplete";
+    
+    const myCompletion = taskCompletions.find(
+      c => c.completedByDeviceId === deviceId || c.completedByUserId === user?.id
+    );
+    const othersCompleted = taskCompletions.some(
+      c => c.completedByDeviceId !== deviceId && c.completedByUserId !== user?.id
+    );
+    
+    if (myCompletion && othersCompleted) return "completed-by-me-and-others";
+    if (myCompletion) return "completed-by-me";
+    return "completed-by-others";
   };
 
-  const getTaskStatus = (taskId: number): TaskStatus => {
-    const taskCompletions = getCompletionsForTask(taskId);
-    const completedByMe = taskCompletions.some(c => c.isMe);
-    const completedByOthers = taskCompletions.some(c => !c.isMe);
-
-    if (completedByMe && completedByOthers) {
-      return "completed-by-me-and-others";
-    }
-    if (completedByMe) {
-      return "completed-by-me";
-    }
-    if (completedByOthers) {
-      return "completed-by-others";
-    }
-    return "incomplete";
+  const getCompletionsForTask = (taskId: number): CompletionInfo[] => {
+    const taskCompletions = completions.filter(c => c.challengeId === taskId);
+    return taskCompletions.map(c => ({
+      name: c.completedByName,
+      isMe: c.completedByDeviceId === deviceId || c.completedByUserId === user?.id,
+    }));
   };
 
   const handleTaskToggle = async (taskId: number) => {
-    if (pendingToggle === taskId) return;
+    if (addCompletionMutation.isPending || removeCompletionMutation.isPending) return;
     
     const currentStatus = getTaskStatus(taskId);
-    const isCurrentlyCompletedByMe = currentStatus === "completed-by-me" || currentStatus === "completed-by-me-and-others";
     
-    setPendingToggle(taskId);
-    
-    try {
-      if (isCurrentlyCompletedByMe) {
-        await removeCompletionMutation.mutateAsync(taskId);
-      } else {
+    if (currentStatus === "incomplete") {
+      setPendingToggle(taskId);
+      try {
         await addCompletionMutation.mutateAsync(taskId);
         
         if (!isAuthenticated && !hasShownPromptThisSession) {
-          setShowSignInPrompt(true);
-          setHasShownPromptThisSession(true);
+          setTimeout(() => {
+            setShowSignInPrompt(true);
+            setHasShownPromptThisSession(true);
+          }, 500);
         }
+      } finally {
+        setPendingToggle(null);
       }
-    } catch (error) {
-      console.error("Failed to toggle task:", error);
-    } finally {
-      setPendingToggle(null);
+    } else if (currentStatus === "completed-by-me" || currentStatus === "completed-by-me-and-others") {
+      setPendingToggle(taskId);
+      try {
+        await removeCompletionMutation.mutateAsync(taskId);
+      } finally {
+        setPendingToggle(null);
+      }
     }
   };
 
@@ -160,6 +160,11 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
       onSubmit();
     }, 2000);
   };
+
+  const incompleteInCurrentStep = activeStep?.challenges.filter(
+    c => !globalCompletedChallengeIds.has(c.id)
+  ) || [];
+  const hasIncompleteChallenges = incompleteInCurrentStep.length > 0;
 
   const refreshMutation = useMutation({
     mutationFn: async (challengeIdsToReplace: number[]) => {
@@ -184,13 +189,8 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
     },
   });
 
-  const incompleteInCurrentStep = (activeStep?.challenges || []).filter(
-    c => !globalCompletedChallengeIds.has(c.id)
-  );
-  const hasIncompleteChallenges = incompleteInCurrentStep.length > 0;
-
-  const handleRefresh = useCallback(async () => {
-    if (incompleteInCurrentStep.length === 0) {
+  const handleRefresh = useCallback(async (): Promise<void> => {
+    if (!hasIncompleteChallenges) {
       toast({
         title: "No challenges to refresh",
         description: "All challenges in this step are complete.",
@@ -201,19 +201,13 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
     
     const idsToReplace = incompleteInCurrentStep.map(c => c.id);
     await refreshMutation.mutateAsync(idsToReplace);
-  }, [incompleteInCurrentStep, refreshMutation, toast]);
-
-  const { pullDistance, isPulling, isRefreshing: isPullRefreshing, handlers } = usePullToRefresh({
-    onRefresh: handleRefresh,
-    containerRef: contentRef,
-    threshold: 80,
-    disabled: !hasIncompleteChallenges || totalCompletedCount >= tasks.length,
-  });
+  }, [incompleteInCurrentStep, refreshMutation, toast, hasIncompleteChallenges]);
 
   const currentStepChallenges = activeStep?.challenges || [];
   const canGoBack = activeStepIndex > 0 && canNavigateToStep(activeStepIndex - 1);
   const canGoForward = activeStepIndex < steps.length - 1 && canNavigateToStep(activeStepIndex + 1);
   const isAllComplete = totalCompletedCount >= tasks.length;
+  const pullToRefreshDisabled = !hasIncompleteChallenges || isAllComplete;
 
   return (
     <div className="min-h-screen bg-background">
@@ -226,40 +220,12 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
         canNavigateToStep={canNavigateToStep}
       />
       
-      <div 
-        className="max-w-2xl mx-auto px-4 py-6" 
-        ref={contentRef}
-        onTouchStart={handlers.onTouchStart}
-        onTouchMove={handlers.onTouchMove}
-        onTouchEnd={handlers.onTouchEnd}
+      <PullToRefresh
+        onRefresh={handleRefresh}
+        disabled={pullToRefreshDisabled}
+        className="max-w-2xl mx-auto px-4 py-6"
+        resistance={2.5}
       >
-        {(pullDistance > 0 || isPullRefreshing) && (
-          <div 
-            className="flex items-center justify-center transition-all overflow-hidden"
-            style={{ 
-              height: isPullRefreshing ? 60 : pullDistance,
-              opacity: Math.min(pullDistance / 40, 1),
-            }}
-            data-testid="pull-refresh-indicator"
-          >
-            <div className="flex flex-col items-center gap-1">
-              <RefreshCw 
-                className={`h-5 w-5 text-muted-foreground ${isPullRefreshing ? 'animate-spin' : ''}`}
-                style={{ 
-                  transform: isPullRefreshing ? 'none' : `rotate(${pullDistance * 3}deg)`,
-                }}
-              />
-              <span className="text-xs text-muted-foreground">
-                {isPullRefreshing 
-                  ? 'Refreshing...' 
-                  : pullDistance >= 80 
-                    ? 'Release to refresh' 
-                    : 'Pull to refresh'}
-              </span>
-            </div>
-          </div>
-        )}
-
         <div className="flex items-center justify-between mb-4">
           <Button
             variant="ghost"
@@ -293,18 +259,19 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
           </Button>
         </div>
 
-        {hasIncompleteChallenges && !isAllComplete && !isPullRefreshing && (
+        {hasIncompleteChallenges && !isAllComplete && (
           <div className="flex items-center justify-center gap-2 mb-4">
             <p className="text-xs text-muted-foreground">
               Pull down to swap {incompleteInCurrentStep.length} incomplete {incompleteInCurrentStep.length === 1 ? 'challenge' : 'challenges'}
             </p>
             <button
               onClick={handleRefresh}
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              disabled={refreshMutation.isPending}
+              className="text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
               data-testid="button-refresh-step"
               aria-label="Refresh incomplete challenges"
             >
-              <RefreshCw className="h-4 w-4" />
+              <RefreshCw className={`h-4 w-4 ${refreshMutation.isPending ? 'animate-spin' : ''}`} />
             </button>
           </div>
         )}
@@ -327,7 +294,7 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
         />
-      </div>
+      </PullToRefresh>
 
       {showSignInPrompt && (
         <SignInPrompt
