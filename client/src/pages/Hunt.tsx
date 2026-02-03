@@ -31,6 +31,7 @@ export default function Hunt() {
       }
       return response.json();
     },
+    refetchInterval: 2000, // Poll for room updates (including refreshed challenges)
   });
 
   // Redirect to lobby if hunt hasn't started yet
