@@ -161,41 +161,50 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
     }, 2000);
   };
 
-  const handleRefresh = useCallback(() => {
+  const refreshMutation = useMutation({
+    mutationFn: async (challengeIdsToReplace: number[]) => {
+      return apiRequest("POST", `/api/rooms/${roomCode}/refresh-challenges`, {
+        challengeIdsToReplace,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/rooms", roomCode] });
+      toast({
+        title: "Challenges refreshed",
+        description: "New challenges loaded for this step.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Refresh failed",
+        description: error.message || "Could not refresh challenges. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleRefresh = useCallback(async () => {
     const incompleteInCurrentStep = activeStep?.challenges.filter(
       c => !globalCompletedChallengeIds.has(c.id)
-    );
+    ) || [];
     
-    if (incompleteInCurrentStep && incompleteInCurrentStep.length > 0) {
+    if (incompleteInCurrentStep.length === 0) {
       toast({
-        title: "Complete current challenges first",
-        description: "Finish all challenges in this step before refreshing.",
-        variant: "default",
-      });
-      return;
-    }
-    
-    const allChallengesCompleted = tasks.every(t => globalCompletedChallengeIds.has(t.id));
-    const globallyIncomplete = tasks.filter(t => !globalCompletedChallengeIds.has(t.id));
-    
-    if (globallyIncomplete.length === 0 || allChallengesCompleted) {
-      toast({
-        title: "All challenges complete!",
-        description: "No new challenges available. You can submit your BeanGo!",
+        title: "No challenges to refresh",
+        description: "All challenges in this step are complete.",
         variant: "default",
       });
       return;
     }
     
     setIsRefreshing(true);
-    setTimeout(() => {
+    try {
+      const idsToReplace = incompleteInCurrentStep.map(c => c.id);
+      await refreshMutation.mutateAsync(idsToReplace);
+    } finally {
       setIsRefreshing(false);
-      toast({
-        title: "Challenges refreshed",
-        description: "New challenges loaded for this step.",
-      });
-    }, 500);
-  }, [activeStep, globalCompletedChallengeIds, tasks, toast]);
+    }
+  }, [activeStep, globalCompletedChallengeIds, refreshMutation, toast]);
 
   const currentStepChallenges = activeStep?.challenges || [];
   const canGoBack = activeStepIndex > 0 && canNavigateToStep(activeStepIndex - 1);
@@ -247,24 +256,32 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
           </Button>
         </div>
 
-        {activeStep?.status === "completed" && !isAllComplete && (
-          <div className="mb-4 p-3 bg-chart-2/10 rounded-lg border border-chart-2/20 flex items-center justify-between">
-            <p className="text-sm text-chart-2 font-medium">
-              Step complete! Pull to refresh for new challenges.
-            </p>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="text-chart-2 hover:text-chart-2"
-              data-testid="button-refresh-step"
-            >
-              <RefreshCw className={`h-4 w-4 mr-1 ${isRefreshing ? "animate-spin" : ""}`} />
-              Refresh
-            </Button>
-          </div>
-        )}
+        {(() => {
+          const incompleteCount = (activeStep?.challenges || []).filter(
+            c => !globalCompletedChallengeIds.has(c.id)
+          ).length;
+          const hasIncomplete = incompleteCount > 0;
+          
+          if (!hasIncomplete || isAllComplete) return null;
+          
+          return (
+            <div className="mb-4 p-3 bg-muted/50 rounded-lg border border-border flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                Swap {incompleteCount} incomplete {incompleteCount === 1 ? 'challenge' : 'challenges'} for new ones
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                data-testid="button-refresh-step"
+              >
+                <RefreshCw className={`h-4 w-4 mr-1 ${isRefreshing ? "animate-spin" : ""}`} />
+                Refresh
+              </Button>
+            </div>
+          );
+        })()}
 
         {currentStepChallenges.map((task) => (
           <TaskCard

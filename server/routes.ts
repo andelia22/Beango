@@ -488,6 +488,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Swap incomplete challenges with new ones from the pool
+  app.post("/api/rooms/:code/refresh-challenges", async (req: any, res) => {
+    try {
+      const { code } = req.params;
+      const { challengeIdsToReplace } = req.body;
+      
+      if (!Array.isArray(challengeIdsToReplace) || challengeIdsToReplace.length === 0) {
+        return res.status(400).json({ error: "challengeIdsToReplace must be a non-empty array" });
+      }
+      
+      const room = await storage.getRoom(code);
+      if (!room) {
+        return res.status(404).json({ error: "Room not found" });
+      }
+      
+      const cityId = room.cityId;
+      const allChallenges = await storage.getCityChallenges(cityId);
+      if (!allChallenges || allChallenges.length === 0) {
+        return res.status(404).json({ error: "City challenges not found" });
+      }
+      
+      const currentlySelectedSet = new Set(room.selectedChallengeIds || []);
+      
+      // Validate all requested IDs are actually in the room's selected challenges
+      for (const id of challengeIdsToReplace) {
+        if (!currentlySelectedSet.has(id)) {
+          return res.status(400).json({ error: `Challenge ID ${id} is not in this room's selected challenges` });
+        }
+      }
+      
+      // Find available challenges (not currently in use, excluding ones being replaced)
+      const availableChallenges = allChallenges.filter(c => 
+        !currentlySelectedSet.has(c.id)
+      );
+      
+      if (availableChallenges.length < challengeIdsToReplace.length) {
+        return res.status(400).json({ error: "Not enough challenges available to swap" });
+      }
+      
+      // Randomly select new challenges
+      const shuffled = availableChallenges.sort(() => Math.random() - 0.5);
+      const newChallengeIds = shuffled.slice(0, challengeIdsToReplace.length).map(c => c.id);
+      
+      if (newChallengeIds.length !== challengeIdsToReplace.length) {
+        return res.status(400).json({ error: "Could not find enough replacement challenges" });
+      }
+      
+      const updatedRoom = await storage.swapChallenges(code, challengeIdsToReplace, newChallengeIds);
+      
+      res.json({ 
+        success: true, 
+        swapped: challengeIdsToReplace.length,
+        newChallengeIds,
+        selectedChallengeIds: updatedRoom?.selectedChallengeIds 
+      });
+    } catch (error) {
+      console.error("Error refreshing challenges:", error);
+      res.status(500).json({ error: "Failed to refresh challenges" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

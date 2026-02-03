@@ -52,6 +52,7 @@ export interface IStorage {
   getRoom(code: string): Promise<Room | undefined>;
   updateRoomStatus(code: string, status: string): Promise<Room | undefined>;
   startHunt(code: string, selectedChallengeIds: number[]): Promise<Room | undefined>;
+  swapChallenges(code: string, oldChallengeIds: number[], newChallengeIds: number[]): Promise<Room | undefined>;
   getRoomsByDeviceId(deviceId: string): Promise<Room[]>;
   getRoomsByUserId(userId: string): Promise<Room[]>;
   getParticipantInterests(roomCode: string): Promise<string[][]>;
@@ -158,6 +159,9 @@ export class MemStorage implements IStorage {
     throw new Error("Not implemented in MemStorage");
   }
   async startHunt(_code: string, _selectedChallengeIds: number[]): Promise<Room | undefined> {
+    throw new Error("Not implemented");
+  }
+  async swapChallenges(_code: string, _oldChallengeIds: number[], _newChallengeIds: number[]): Promise<Room | undefined> {
     throw new Error("Not implemented in MemStorage");
   }
   async getRoomsByDeviceId(_deviceId: string): Promise<Room[]> {
@@ -342,6 +346,32 @@ export class DatabaseStorage implements IStorage {
         status: "in_progress", 
         selectedChallengeIds,
         totalChallenges: 24,
+        updatedAt: new Date() 
+      })
+      .where(eq(roomsTable.code, code))
+      .returning();
+    return updated[0];
+  }
+
+  async swapChallenges(code: string, oldChallengeIds: number[], newChallengeIds: number[]): Promise<Room | undefined> {
+    const room = await this.getRoom(code);
+    if (!room || !room.selectedChallengeIds) return undefined;
+    
+    const currentIds = [...room.selectedChallengeIds];
+    const oldSet = new Set(oldChallengeIds);
+    
+    let newIdx = 0;
+    const updatedIds = currentIds.map(id => {
+      if (oldSet.has(id) && newIdx < newChallengeIds.length) {
+        return newChallengeIds[newIdx++];
+      }
+      return id;
+    });
+    
+    const updated = await db
+      .update(roomsTable)
+      .set({ 
+        selectedChallengeIds: updatedIds,
         updatedAt: new Date() 
       })
       .where(eq(roomsTable.code, code))
