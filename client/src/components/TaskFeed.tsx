@@ -7,6 +7,7 @@ import StepNavigationBar from "./StepNavigationBar";
 import { SignInPrompt } from "./SignInPrompt";
 import { useAuth } from "@/hooks/useAuth";
 import { useStepProgression, type StepChallenge } from "@/hooks/useStepProgression";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { getDeviceId } from "@/lib/deviceId";
 import { ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
@@ -50,7 +51,6 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
   const [showSignInPrompt, setShowSignInPrompt] = useState(false);
   const [hasShownPromptThisSession, setHasShownPromptThisSession] = useState(false);
   const [pendingToggle, setPendingToggle] = useState<number | null>(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
   const { data: completions = [] } = useQuery<ChallengeCompletion[]>({
@@ -167,8 +167,9 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
         challengeIdsToReplace,
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/rooms", roomCode] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["/api/rooms", roomCode] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/cities"] });
       toast({
         title: "Challenges refreshed",
         description: "New challenges loaded for this step.",
@@ -183,11 +184,12 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
     },
   });
 
+  const incompleteInCurrentStep = (activeStep?.challenges || []).filter(
+    c => !globalCompletedChallengeIds.has(c.id)
+  );
+  const hasIncompleteChallenges = incompleteInCurrentStep.length > 0;
+
   const handleRefresh = useCallback(async () => {
-    const incompleteInCurrentStep = activeStep?.challenges.filter(
-      c => !globalCompletedChallengeIds.has(c.id)
-    ) || [];
-    
     if (incompleteInCurrentStep.length === 0) {
       toast({
         title: "No challenges to refresh",
@@ -197,14 +199,16 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
       return;
     }
     
-    setIsRefreshing(true);
-    try {
-      const idsToReplace = incompleteInCurrentStep.map(c => c.id);
-      await refreshMutation.mutateAsync(idsToReplace);
-    } finally {
-      setIsRefreshing(false);
-    }
-  }, [activeStep, globalCompletedChallengeIds, refreshMutation, toast]);
+    const idsToReplace = incompleteInCurrentStep.map(c => c.id);
+    await refreshMutation.mutateAsync(idsToReplace);
+  }, [incompleteInCurrentStep, refreshMutation, toast]);
+
+  const { pullDistance, isPulling, isRefreshing: isPullRefreshing, handlers } = usePullToRefresh({
+    onRefresh: handleRefresh,
+    containerRef: contentRef,
+    threshold: 80,
+    disabled: !hasIncompleteChallenges || totalCompletedCount >= tasks.length,
+  });
 
   const currentStepChallenges = activeStep?.challenges || [];
   const canGoBack = activeStepIndex > 0 && canNavigateToStep(activeStepIndex - 1);
@@ -222,7 +226,40 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
         canNavigateToStep={canNavigateToStep}
       />
       
-      <div className="max-w-2xl mx-auto px-4 py-6" ref={contentRef}>
+      <div 
+        className="max-w-2xl mx-auto px-4 py-6" 
+        ref={contentRef}
+        onTouchStart={handlers.onTouchStart}
+        onTouchMove={handlers.onTouchMove}
+        onTouchEnd={handlers.onTouchEnd}
+      >
+        {(pullDistance > 0 || isPullRefreshing) && (
+          <div 
+            className="flex items-center justify-center transition-all overflow-hidden"
+            style={{ 
+              height: isPullRefreshing ? 60 : pullDistance,
+              opacity: Math.min(pullDistance / 40, 1),
+            }}
+            data-testid="pull-refresh-indicator"
+          >
+            <div className="flex flex-col items-center gap-1">
+              <RefreshCw 
+                className={`h-5 w-5 text-muted-foreground ${isPullRefreshing ? 'animate-spin' : ''}`}
+                style={{ 
+                  transform: isPullRefreshing ? 'none' : `rotate(${pullDistance * 3}deg)`,
+                }}
+              />
+              <span className="text-xs text-muted-foreground">
+                {isPullRefreshing 
+                  ? 'Refreshing...' 
+                  : pullDistance >= 80 
+                    ? 'Release to refresh' 
+                    : 'Pull to refresh'}
+              </span>
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-between mb-4">
           <Button
             variant="ghost"
@@ -256,32 +293,21 @@ export default function TaskFeed({ cityName, roomCode, tasks, onSubmit }: TaskFe
           </Button>
         </div>
 
-        {(() => {
-          const incompleteCount = (activeStep?.challenges || []).filter(
-            c => !globalCompletedChallengeIds.has(c.id)
-          ).length;
-          const hasIncomplete = incompleteCount > 0;
-          
-          if (!hasIncomplete || isAllComplete) return null;
-          
-          return (
-            <div className="mb-4 p-3 bg-muted/50 rounded-lg border border-border flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                Swap {incompleteCount} incomplete {incompleteCount === 1 ? 'challenge' : 'challenges'} for new ones
-              </p>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                data-testid="button-refresh-step"
-              >
-                <RefreshCw className={`h-4 w-4 mr-1 ${isRefreshing ? "animate-spin" : ""}`} />
-                Refresh
-              </Button>
-            </div>
-          );
-        })()}
+        {hasIncompleteChallenges && !isAllComplete && !isPullRefreshing && (
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <p className="text-xs text-muted-foreground">
+              Pull down to swap {incompleteInCurrentStep.length} incomplete {incompleteInCurrentStep.length === 1 ? 'challenge' : 'challenges'}
+            </p>
+            <button
+              onClick={handleRefresh}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              data-testid="button-refresh-step"
+              aria-label="Refresh incomplete challenges"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </button>
+          </div>
+        )}
 
         {currentStepChallenges.map((task) => (
           <TaskCard
