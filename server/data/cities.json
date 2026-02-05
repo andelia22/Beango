@@ -493,6 +493,40 @@
 {"id": 60, "caption": "Join a local 'callejoneada' (walking musical tour) through the streets of Coyoacán.", "imageUrl": "/attached_assets/generated_images/mexico-city/callejonada.jpg", "interests": ["Local Life", "Nightlife"]}
 ]
 },
+{
+  "id": "rome",
+  "name": "Rome",
+  "description": "Rome is a sprawling museum of ancient ruins, baroque fountains, cobblestone alleys, and the unmistakable aroma of fresh pasta.",
+  "challengeCount": 26,
+  "challenges": [
+    { "id": 1, "caption": "Climb the steps of Altare della Patria and look out over the ruins of the Roman Forum.", "imageUrl": "/attached_assets/generated_images/rome/altare-della-patria-scale.png", "interests": ["Iconic Landmarks"] },
+    { "id": 2, "caption": "Find the Aventine Keyhole and peek through to see St. Peter's Dome perfectly framed.", "imageUrl": "/attached_assets/generated_images/rome/aventine-keyhole.png", "interests": ["Iconic Landmarks"] },
+    { "id": 3, "caption": "Walk across the bridge to Castel Sant'Angelo and count the angel statues lining the path.", "imageUrl": "/attached_assets/generated_images/rome/castel-sant-angelo-bridge.png", "interests": ["Iconic Landmarks"] },
+    { "id": 4, "caption": "Stand in the center of the Colosseum and imagine the roar of the ancient crowds.", "imageUrl": "/attached_assets/generated_images/rome/Colosseo.png", "interests": ["Iconic Landmarks"] },
+    { "id": 5, "caption": "Walk the ancient stones of the Foro Romano and find the site of the Temple of Saturn.", "imageUrl": "/attached_assets/generated_images/rome/ForoRomano.png", "interests": ["Iconic Landmarks"] },
+    { "id": 6, "caption": "Hike up Palatine Hill and find the best view of the Circus Maximus below.", "imageUrl": "/attached_assets/generated_images/rome/PalatineHill.png", "interests": ["Iconic Landmarks"] },
+    { "id": 7, "caption": "Enter the Pantheon and look directly up through the Oculus at the Roman sky.", "imageUrl": "/attached_assets/generated_images/rome/PantheonOculus.png", "interests": ["Iconic Landmarks"] },
+    { "id": 8, "caption": "Stand in Piazza del Campidoglio and admire the geometric pattern designed by Michelangelo.", "imageUrl": "/attached_assets/generated_images/rome/piazza-del-campidoglio-rome.png", "interests": ["Iconic Landmarks"] },
+    { "id": 9, "caption": "Visit Piazza Navona and find your favorite detail on the Fountain of the Four Rivers.", "imageUrl": "/attached_assets/generated_images/rome/piazza-navona-fountains.png", "interests": ["Iconic Landmarks"] },
+    { "id": 10, "caption": "Watch the sunset from the top of the Spanish Steps before the city lights take over.", "imageUrl": "/attached_assets/generated_images/rome/spanish-steps-top.png", "interests": ["Iconic Landmarks"] },
+    { "id": 11, "caption": "Stand in the center of St. Peter's Square and try to align the columns of the colonnade.", "imageUrl": "/attached_assets/generated_images/rome/st-peters-square-scale.png", "interests": ["Iconic Landmarks"] },
+    { "id": 12, "caption": "Toss a coin over your shoulder into the Trevi Fountain to ensure your return to Rome.", "imageUrl": "/attached_assets/generated_images/rome/trevi-fountain-coin.png", "interests": ["Iconic Landmarks"] },
+    { "id": 13, "caption": "Climb Gianicolo Hill for a panoramic view of the Roman skyline at dusk.", "imageUrl": "/attached_assets/generated_images/rome/gianicolo-viewpoint.png", "interests": ["Nature & Outdoors"] },
+    { "id": 14, "caption": "Walk across Ponte Garibaldi and watch the Tiber river flow beneath you.", "imageUrl": "/attached_assets/generated_images/rome/ponte-garibaldi-tiber.png", "interests": ["Nature & Outdoors"] },
+    { "id": 15, "caption": "Head to Bonci for a slice of Rome’s most famous pizza al taglio.", "imageUrl": "/attached_assets/generated_images/rome/bonci-gallery-20.png", "interests": ["Food & Drinks"] },
+    { "id": 16, "caption": "Wander through Campo de' Fiori and sample local cheeses or balsamic at the market stalls.", "imageUrl": "/attached_assets/generated_images/rome/campo-de-fiori-food.png", "interests": ["Food & Drinks"] },
+    { "id": 17, "caption": "Grab a cup of gelato and find a nearby fountain to sit by while you enjoy it.", "imageUrl": "/attached_assets/generated_images/rome/gelato-single-flavor.png", "interests": ["Food & Drinks"] },
+    { "id": 18, "caption": "Order a plate of Paccheri Cacio e Pepe and enjoy the perfect Roman simplicity.", "imageUrl": "/attached_assets/generated_images/rome/pacchericacioepepe.png", "interests": ["Food & Drinks"] },
+    { "id": 19, "caption": "Break open a hot Supplì and see if you can make the 'telephone' string of cheese.", "imageUrl": "/attached_assets/generated_images/rome/suppli-cross-section.png", "interests": ["Food & Drinks"] },
+    { "id": 20, "caption": "Visit a traditional osteria in Testaccio and try a dish recommended by the server.", "imageUrl": "/attached_assets/generated_images/rome/testaccio-traditional-dish.png", "interests": ["Food & Drinks"] },
+    { "id": 21, "caption": "Step into Santa Maria in Trastevere and look up at the stunning golden mosaics.", "imageUrl": "/attached_assets/generated_images/rome/santa-maria-mosaic.png", "interests": ["History & Culture"] },
+    { "id": 22, "caption": "Walk the length of the Pantheon's portico and feel the scale of the ancient columns.", "imageUrl": "/attached_assets/generated_images/rome/Pantheon.JPG", "interests": ["History & Culture"] },
+    { "id": 23, "caption": "Walk into St. Peter's Basilica and stand beneath the massive dome.", "imageUrl": "/attached_assets/generated_images/rome/st-peters-facade.jpg", "interests": ["History & Culture"] },
+    { "id": 24, "caption": "Navigate the chaos of Piazza Venezia and watch the 'urban ballet' of Roman traffic.", "imageUrl": "/attached_assets/generated_images/rome/piazza-venezia-traffic.png", "interests": ["Local Life"] },
+    { "id": 25, "caption": "Get lost in the narrow, ivy-covered side streets of Trastevere.", "imageUrl": "/attached_assets/generated_images/rome/trastevere-side-street.png", "interests": ["Local Life"] },
+    { "id": 26, "caption": "Stroll down Via del Corso and window shop alongside the locals.", "imageUrl": "/attached_assets/generated_images/rome/via-del-corso.png", "interests": ["Local Life"] }
+  ]
+},
     {
       "id": "test-city",
       "name": "Test City",
